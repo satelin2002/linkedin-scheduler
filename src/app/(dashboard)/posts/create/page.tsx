@@ -405,7 +405,7 @@ export default function CreatePostPage() {
 
               {/* Preview Panel */}
               {isPreviewMode && (
-                <div className="hidden lg:flex flex-col w-[600px] rounded-lg border bg-card text-card-foreground shadow-sm relative overflow-hidden">
+                <div className="hidden lg:flex flex-col w-[600px] rounded-lg bg-slate-50 border bg-card text-card-foreground shadow-sm relative overflow-hidden">
                   <div className="border-b p-2 relative bg-white">
                     <div className="flex items-center justify-between px-2">
                       <div className="flex gap-1">
