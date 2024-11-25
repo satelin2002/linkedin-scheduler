@@ -191,14 +191,14 @@ export default function CreatePostPage() {
                       <TabsList className="inline-flex h-12 items-center justify-center rounded-full bg-gradient-to-r from-primary/10 to-primary/5 p-1.5 w-[300px] mx-auto mb-6">
                         <TabsTrigger
                           value="predefined"
-                          className="inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm hover:bg-white/50 hover:text-primary/80"
+                          className="inline-flex items-center justify-center rounded-full px-3 py-2 text-sm font-medium transition-all data-[state=active]:bg-white  data-[state=active]:font-semibold data-[state=active]:text-primary data-[state=active]:shadow-sm hover:bg-white/50 hover:text-primary/80"
                         >
                           <Hash className="h-4 w-4 mr-2" />
                           Default Topics
                         </TabsTrigger>
                         <TabsTrigger
                           value="custom"
-                          className="inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm hover:bg-white/50 hover:text-primary/80"
+                          className="inline-flex items-center justify-center rounded-full px-3 py-2 text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-sm hover:bg-white/50 hover:text-primary/80"
                         >
                           <PenLine className="h-4 w-4 mr-2" />
                           Custom Topic
@@ -432,8 +432,8 @@ export default function CreatePostPage() {
                               <Image
                                 src={image}
                                 alt={`Uploaded image ${index + 1}`}
-                                width={120}
-                                height={120}
+                                width={80}
+                                height={80}
                                 className="rounded-md object-cover"
                               />
                               <Button
@@ -442,7 +442,7 @@ export default function CreatePostPage() {
                                 className="absolute -top-2 -right-2 h-6 w-6 bg-background opacity-0 group-hover:opacity-100 transition-opacity"
                                 onClick={() => removeImage(index)}
                               >
-                                <X className="h-4 w-4" />
+                                <X className="h-4 w-4 text-red-500" />
                               </Button>
                             </div>
                           ))}
@@ -473,7 +473,7 @@ export default function CreatePostPage() {
                                       ?.click()
                                   }
                                 >
-                                  <ImagePlus className="h-7 w-7" />
+                                  <ImagePlus className="h-5 w-5" />
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent

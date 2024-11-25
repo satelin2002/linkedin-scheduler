@@ -163,3 +163,30 @@ export const popularTopics: TopicSection[] = [
     ],
   },
 ];
+
+export const userPosts = [
+  {
+    id: "1",
+    content:
+      "🚀 Just launched our new AI-powered feature! Excited to share that our team has been working on implementing machine learning algorithms to enhance user experience. What are your thoughts on AI in product development? #AI #Innovation #Tech",
+    topics: ["🤖 AI", "💡 Innovation"],
+    timestamp: "2024-02-24T09:30:00Z",
+    saved: false,
+  },
+  {
+    id: "2",
+    content:
+      "📊 Data-driven decision making is key to success. Here's how we increased our conversion rate by 40% using A/B testing and user behavior analytics. Would love to hear your experiences with data analytics! #DataScience #Growth",
+    topics: ["📊 Analytics", "📈 Growth"],
+    timestamp: "2024-02-23T14:20:00Z",
+    saved: true,
+  },
+  {
+    id: "3",
+    content:
+      "🎯 Product-market fit is crucial for startups. We spent 3 months interviewing customers and iterating on our MVP. The insights we gained were invaluable. What strategies do you use to validate your product? #StartupLife #ProductDevelopment",
+    topics: ["🚀 Startup", "💡 Product"],
+    timestamp: "2024-02-22T11:15:00Z",
+    saved: false,
+  },
+];

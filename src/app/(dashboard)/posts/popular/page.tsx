@@ -4,7 +4,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Bookmark, Send, Calendar, Lightbulb } from "lucide-react";
+import { Bookmark, Send, Calendar, Lightbulb, PenSquare } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -171,6 +171,22 @@ export default function PopularPostsPage() {
                                           </TooltipTrigger>
                                           <TooltipContent className="bg-black text-white border-black">
                                             Save post
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      </TooltipProvider>
+                                      <TooltipProvider>
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary"
+                                            >
+                                              <PenSquare className="h-4 w-4" />
+                                            </Button>
+                                          </TooltipTrigger>
+                                          <TooltipContent className="bg-black text-white border-black">
+                                            Edit post
                                           </TooltipContent>
                                         </Tooltip>
                                       </TooltipProvider>
