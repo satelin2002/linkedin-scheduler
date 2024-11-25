@@ -8,7 +8,7 @@ import HeartIcon from "@/components/ui/hearts";
 import LikeIcon from "@/components/ui/like";
 import ThumbsUpIcon from "@/components/ui/thumbs-up";
 import { Separator } from "@/components/ui/separator";
-import { Send, Save, Plus, X } from "lucide-react";
+import { Send, Save, Plus, X, ImagePlus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 import {
@@ -50,6 +50,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { availableTopics, mockIdeas } from "@/lib/mock";
+import { ImageUpload } from "@/components/posts/image-upload";
+import Image from "next/image";
+import { Label } from "@/components/ui/label";
 
 export default function CreatePostPage() {
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
@@ -65,6 +68,7 @@ export default function CreatePostPage() {
   const [customTopic, setCustomTopic] = useState("");
   const [copySuccess, setCopySuccess] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("topics");
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
 
   const handleTopicSelect = (topic: string) => {
     setSelectedTopics((prev) =>
@@ -116,6 +120,21 @@ export default function CreatePostPage() {
       console.error("Failed to copy text: ", err);
     }
   }, [content]);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setUploadedImages((prev) => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setUploadedImages((prev) => prev.filter((_, i) => i !== index));
+  };
 
   return (
     <SidebarProvider>
@@ -378,26 +397,89 @@ export default function CreatePostPage() {
                     </div>
 
                     {/* Content Editor */}
-                    <Textarea
-                      value={content}
-                      onChange={(e) => setContent(e.target.value)}
-                      placeholder="Write your post content here..."
-                      className="min-h-[300px]"
-                    />
+                    <div className="space-y-4">
+                      {/* Uploaded Images Display */}
+                      {uploadedImages.length > 0 && (
+                        <div className="flex flex-wrap gap-2 pb-4">
+                          {uploadedImages.map((image, index) => (
+                            <div key={index} className="relative group">
+                              <Image
+                                src={image}
+                                alt={`Uploaded image ${index + 1}`}
+                                width={120}
+                                height={120}
+                                className="rounded-md object-cover"
+                              />
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="absolute -top-2 -right-2 h-6 w-6 bg-background opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => removeImage(index)}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
 
-                    {/* Action Buttons */}
-                    <div className="flex justify-end gap-2 pt-4">
-                      <Button
-                        variant="outline"
-                        className="hover:bg-primary/10 hover:text-primary border-primary"
-                      >
-                        <Save className="mr-2 h-4 w-4" />
-                        Save Draft
-                      </Button>
-                      <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                        <Send className="mr-2 h-4 w-4" />
-                        Publish Post
-                      </Button>
+                      {/* Text Area */}
+                      <Textarea
+                        value={content}
+                        onChange={(e) => setContent(e.target.value)}
+                        placeholder="Write your post content here..."
+                        className="min-h-[300px]"
+                      />
+
+                      {/* Action Buttons */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-14 w-14 rounded-full hover:bg-muted"
+                                  onClick={() =>
+                                    document
+                                      .getElementById("image-upload")
+                                      ?.click()
+                                  }
+                                >
+                                  <ImagePlus className="h-7 w-7" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent
+                                side="top"
+                                className="bg-black text-white border-black"
+                              >
+                                <p>Add image to post</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          <input
+                            id="image-upload"
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleImageUpload}
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            className="hover:bg-primary/10 hover:text-primary border-primary"
+                          >
+                            <Save className="mr-2 h-4 w-4" />
+                            Save Draft
+                          </Button>
+                          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                            <Send className="mr-2 h-4 w-4" />
+                            Publish Post
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -493,24 +575,16 @@ export default function CreatePostPage() {
                           </div>
                         </div>
 
-                        {/* Post Content */}
+                        {/* Post Content with Image */}
                         <div className="p-4 prose prose-sm max-w-none text-sm">
                           {content ? (
-                            <div className="whitespace-pre-wrap">
-                              {isExpanded ? (
-                                <>
-                                  {content}
-                                  <button
-                                    onClick={() => setIsExpanded(false)}
-                                    className="text-primary hover:text-primary/90 mt-2 inline-block ml-1"
-                                  >
-                                    ...less
-                                  </button>
-                                </>
-                              ) : (
-                                <>
-                                  {content.split("\n").slice(0, 2).join("\n")}
-                                  {content.split("\n").length > 2 && (
+                            <div className="space-y-4">
+                              <div className="whitespace-pre-wrap">
+                                {isExpanded
+                                  ? content
+                                  : content.split("\n").slice(0, 2).join("\n")}
+                                {!isExpanded &&
+                                  content.split("\n").length > 2 && (
                                     <button
                                       onClick={() => setIsExpanded(true)}
                                       className="text-primary hover:text-primary/90 inline-block ml-1"
@@ -518,7 +592,20 @@ export default function CreatePostPage() {
                                       ...more
                                     </button>
                                   )}
-                                </>
+                              </div>
+                              {uploadedImages.length > 0 && (
+                                <div className="mt-4 grid gap-2">
+                                  {uploadedImages.map((image, index) => (
+                                    <Image
+                                      key={index}
+                                      src={image}
+                                      alt={`Post image ${index + 1}`}
+                                      width={500}
+                                      height={300}
+                                      className="rounded-lg object-cover w-full"
+                                    />
+                                  ))}
+                                </div>
                               )}
                             </div>
                           ) : (
