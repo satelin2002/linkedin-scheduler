@@ -175,9 +175,9 @@ export default function CreatePostPage() {
               </TypographyMuted>
             </div>
 
-            <div className="flex flex-1 gap-6 p-4 pt-0">
+            <div className="flex flex-col lg:flex-row flex-1 gap-6 p-4 pt-0">
               {/* Left Column - Topics and Ideas */}
-              <div className="w-[600px] space-y-6">
+              <div className="w-full lg:w-[500px] space-y-6">
                 {/* Topics Section */}
                 <div className="rounded-lg border bg-card text-card-foreground p-6">
                   <div className="space-y-4">
@@ -313,7 +313,7 @@ export default function CreatePostPage() {
               </div>
 
               {/* Right Column - Content and Preview */}
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 {/* Content Section */}
                 <div
                   className={cn(
@@ -489,45 +489,36 @@ export default function CreatePostPage() {
                     isPreviewMode ? "block" : "hidden"
                   )}
                 >
-                  <div className="border-b p-2 relative bg-white">
+                  <div className="border-b p-2 relative bg-white overflow-x-auto">
                     <div className="flex items-center justify-between px-2">
-                      <div className="flex gap-1">
+                      <div className="flex gap-1 overflow-x-auto">
                         <Button
-                          variant="ghost"
+                          variant={
+                            activePreview === "desktop" ? "secondary" : "ghost"
+                          }
                           size="sm"
-                          className={cn(
-                            "transition-all",
-                            activePreview === "desktop"
-                              ? "bg-blue-500/10 text-blue-500"
-                              : "hover:bg-blue-500/10 hover:text-blue-500"
-                          )}
                           onClick={() => setActivePreview("desktop")}
+                          className="h-8 w-8 p-0 flex-shrink-0"
                         >
                           <Monitor className="h-4 w-4" />
                         </Button>
                         <Button
-                          variant="ghost"
+                          variant={
+                            activePreview === "tablet" ? "secondary" : "ghost"
+                          }
                           size="sm"
-                          className={cn(
-                            "transition-all",
-                            activePreview === "tablet"
-                              ? "bg-blue-500/10 text-blue-500"
-                              : "hover:bg-blue-500/10 hover:text-blue-500"
-                          )}
                           onClick={() => setActivePreview("tablet")}
+                          className="h-8 w-8 p-0 flex-shrink-0"
                         >
                           <Tablet className="h-4 w-4" />
                         </Button>
                         <Button
-                          variant="ghost"
+                          variant={
+                            activePreview === "mobile" ? "secondary" : "ghost"
+                          }
                           size="sm"
-                          className={cn(
-                            "transition-all",
-                            activePreview === "mobile"
-                              ? "bg-blue-500/10 text-blue-500"
-                              : "hover:bg-blue-500/10 hover:text-blue-500"
-                          )}
                           onClick={() => setActivePreview("mobile")}
+                          className="h-8 w-8 p-0 flex-shrink-0"
                         >
                           <Smartphone className="h-4 w-4" />
                         </Button>
@@ -542,8 +533,7 @@ export default function CreatePostPage() {
                       </Button>
                     </div>
                   </div>
-
-                  <div className="flex-1 overflow-auto p-4">
+                  <div className="overflow-x-auto p-4">
                     <div
                       className={cn(
                         "mx-auto bg-background transition-all duration-200 overflow-auto",
