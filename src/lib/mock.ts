@@ -16,6 +16,17 @@ export const mockIdeas = [
   "Why AI Will Change the Future of Web Development",
   "Building a Personal Brand in the Age of Social Media",
   "The Most Important Productivity Habits for Developers",
+  "How AI is Driving Accessibility in Modern Applications",
+  "The Hidden Challenges of Scaling Microservices",
+  "5 Lessons Startups Can Teach Enterprises About Agility",
+  "Why Cloud-Native Development is the Future of Software Engineering",
+  "Demystifying Large Language Models for Everyday Use Cases",
+  "The Evolution of User Experience in the Era of AI",
+  "How to Balance Innovation with Technical Debt Management",
+  "The Role of Ethics in AI-Driven Decision Making",
+  "How I Built a Side Project That Became a Career Catalyst",
+  "What Every Developer Should Know About API Security",
+  "The Journey of Building a High-Performance Engineering Team",
 ];
 
 export interface PopularPost {

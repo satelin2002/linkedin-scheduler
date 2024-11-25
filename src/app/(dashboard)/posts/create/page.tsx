@@ -53,6 +53,14 @@ import { availableTopics, mockIdeas } from "@/lib/mock";
 import { ImageUpload } from "@/components/posts/image-upload";
 import Image from "next/image";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function CreatePostPage() {
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
@@ -69,6 +77,9 @@ export default function CreatePostPage() {
   const [copySuccess, setCopySuccess] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("topics");
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState<"predefined" | "custom">(
+    "predefined"
+  );
 
   const handleTopicSelect = (topic: string) => {
     setSelectedTopics((prev) =>
@@ -164,8 +175,9 @@ export default function CreatePostPage() {
               </TypographyMuted>
             </div>
 
-            <div className="flex flex-1 gap-4 p-4 pt-0">
-              <div className="flex-1 max-w-4xl space-y-6">
+            <div className="flex flex-1 gap-6 p-4 pt-0">
+              {/* Left Column - Topics and Ideas */}
+              <div className="w-[600px] space-y-6">
                 {/* Topics Section */}
                 <div className="rounded-lg border bg-card text-card-foreground p-6">
                   <div className="space-y-4">
@@ -174,155 +186,141 @@ export default function CreatePostPage() {
                       <TypographyH4>Select Topics</TypographyH4>
                     </div>
 
-                    {/* Topics Grid */}
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
-                      {availableTopics.map((topic) => (
-                        <button
-                          key={topic}
-                          onClick={() => handleTopicSelect(topic)}
-                          className={cn(
-                            "flex items-center gap-2 p-3 rounded-lg border-2 transition-all hover:shadow-sm",
-                            "text-sm font-medium",
-                            selectedTopics.includes(topic)
-                              ? "border-primary bg-primary/5 text-primary"
-                              : "border-border hover:border-primary/50 hover:bg-primary/5"
-                          )}
-                        >
-                          <span className="truncate">{topic}</span>
-                          {selectedTopics.includes(topic) && (
-                            <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                          )}
-                        </button>
-                      ))}
-                    </div>
+                    <Tabs defaultValue="predefined" className="w-full">
+                      <TabsList className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground mb-4">
+                        <TabsTrigger value="predefined">
+                          <Hash className="h-4 w-4 mr-2" />
+                          Default Topics
+                        </TabsTrigger>
+                        <TabsTrigger value="custom">
+                          <PenLine className="h-4 w-4 mr-2" />
+                          Custom Topic
+                        </TabsTrigger>
+                      </TabsList>
 
-                    {/* Custom Topic Input */}
-                    <div className="space-y-2">
-                      <label className="text-sm text-muted-foreground">
-                        Add custom topic
-                      </label>
-                      <div className="flex gap-2">
-                        <Input
-                          value={customTopic}
-                          onChange={(e) => setCustomTopic(e.target.value)}
-                          onKeyDown={handleKeyPress}
-                          placeholder="Enter custom topic..."
-                          className="flex-1"
-                        />
-                        <Button
-                          variant="outline"
-                          size="default"
-                          onClick={handleAddCustomTopic}
-                          disabled={!customTopic.trim()}
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add Topic
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* Selected Topics and Generate Ideas Button */}
-                    {selectedTopics.length > 0 && (
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <label className="text-sm text-muted-foreground">
-                            Selected topics
-                          </label>
-                          <div className="flex flex-wrap gap-2">
-                            {selectedTopics.map((topic) => (
-                              <Badge
-                                key={topic}
-                                variant="default"
-                                className="bg-primary/10 text-primary hover:bg-primary/20 cursor-pointer px-3 py-1.5"
-                                onClick={() => handleTopicSelect(topic)}
-                              >
-                                {topic}
-                                <X className="h-3 w-3 ml-2" />
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Generate Ideas Button */}
-                        <div className="flex justify-end pt-2">
-                          <Button
-                            onClick={handleGenerateIdeas}
-                            className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                            disabled={isGenerating}
+                      <TabsContent value="predefined">
+                        <div className="space-y-4">
+                          <Select
+                            onValueChange={(value) => handleTopicSelect(value)}
                           >
-                            {isGenerating ? (
-                              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                            ) : (
-                              <Wand2 className="h-4 w-4 mr-2" />
-                            )}
-                            Generate Ideas
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Choose a topic" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {availableTopics.map((topic) => (
+                                <SelectItem key={topic} value={topic}>
+                                  {topic}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
 
-                {/* Generated Ideas Section - Only shown when ideas exist */}
-                {generatedIdeas.length > 0 && (
-                  <div className="rounded-lg border bg-card text-card-foreground p-6">
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2 mb-6">
-                        <Sparkles className="h-5 w-5 text-primary" />
-                        <TypographyH4>Generated Ideas</TypographyH4>
-                      </div>
-
-                      {/* Ideas List */}
-                      {generatedIdeas.map((idea) => (
-                        <div
-                          key={idea}
-                          onClick={() => setSelectedIdea(idea)}
-                          className={cn(
-                            "p-4 rounded-lg border-2 cursor-pointer transition-all",
-                            "text-sm flex items-center gap-3",
-                            selectedIdea === idea
-                              ? "bg-primary/10 border-primary text-primary"
-                              : "hover:bg-primary/5 hover:border-primary/50 border-border"
+                          {selectedTopics.length > 0 && (
+                            <Button
+                              onClick={handleGenerateIdeas}
+                              className="w-full"
+                              disabled={isGenerating}
+                            >
+                              {isGenerating ? (
+                                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                              ) : (
+                                <Wand2 className="h-4 w-4 mr-2" />
+                              )}
+                              Generate Ideas
+                            </Button>
                           )}
-                        >
-                          <Lightbulb
-                            className={cn(
-                              "h-4 w-4 flex-shrink-0",
-                              selectedIdea === idea
-                                ? "text-primary"
-                                : "text-muted-foreground"
-                            )}
+                        </div>
+
+                        {/* Generated Ideas Section - Hide completely when Custom tab is selected */}
+                        {activeTab !== "custom" &&
+                          generatedIdeas.length > 0 && (
+                            <div className="space-y-4 mt-6">
+                              <div className="flex items-center gap-2 mb-6">
+                                <Sparkles className="h-5 w-5 text-primary" />
+                                <TypographyH4>Generated Ideas</TypographyH4>
+                              </div>
+
+                              {/* Ideas List */}
+                              <div className="space-y-3">
+                                {generatedIdeas.map((idea) => (
+                                  <div
+                                    key={idea}
+                                    onClick={() => setSelectedIdea(idea)}
+                                    className={cn(
+                                      "p-2 rounded-lg border-2 cursor-pointer transition-all",
+                                      "text-sm flex items-center gap-3",
+                                      selectedIdea === idea
+                                        ? "bg-primary/10 border-primary text-primary"
+                                        : "hover:bg-primary/5 hover:border-primary/50 border-border"
+                                    )}
+                                  >
+                                    <Lightbulb
+                                      className={cn(
+                                        "h-4 w-4 flex-shrink-0",
+                                        selectedIdea === idea
+                                          ? "text-primary"
+                                          : "text-muted-foreground"
+                                      )}
+                                    />
+                                    <span className="flex-1">{idea}</span>
+                                    {selectedIdea === idea && (
+                                      <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+
+                              {/* Generate Post Button - Only show when idea is selected */}
+                              {selectedIdea && (
+                                <Button
+                                  onClick={handleGeneratePost}
+                                  className="w-full mt-4"
+                                  disabled={isGenerating}
+                                >
+                                  {isGenerating ? (
+                                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                                  ) : (
+                                    <PenLine className="h-4 w-4 mr-2" />
+                                  )}
+                                  Generate Post
+                                </Button>
+                              )}
+                            </div>
+                          )}
+                      </TabsContent>
+
+                      <TabsContent value="custom">
+                        <div className="space-y-4">
+                          <Textarea
+                            value={customTopic}
+                            onChange={(e) => setCustomTopic(e.target.value)}
+                            placeholder="Enter your custom topic..."
+                            className="min-h-[100px] resize-none"
                           />
-                          <span className="flex-1">{idea}</span>
-                          {selectedIdea === idea && (
-                            <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                          )}
-                        </div>
-                      ))}
-
-                      {/* Generate Post Button */}
-                      {selectedIdea && (
-                        <div className="flex justify-end pt-4">
                           <Button
                             onClick={handleGeneratePost}
-                            className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                            disabled={isGenerating}
+                            className="w-full"
+                            disabled={!customTopic.trim()}
                           >
-                            {isGenerating ? (
-                              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                            ) : (
-                              <Wand2 className="h-4 w-4 mr-2" />
-                            )}
+                            <Wand2 className="h-4 w-4 mr-2" />
                             Generate Post
                           </Button>
                         </div>
-                      )}
-                    </div>
+                      </TabsContent>
+                    </Tabs>
                   </div>
-                )}
+                </div>
+              </div>
 
+              {/* Right Column - Content and Preview */}
+              <div className="flex-1">
                 {/* Content Section */}
-                <div className="rounded-lg border bg-card text-card-foreground p-6">
+                <div
+                  className={cn(
+                    "rounded-lg border bg-card text-card-foreground p-6",
+                    isPreviewMode ? "hidden" : "block"
+                  )}
+                >
                   <div className="space-y-4">
                     {/* Content Header */}
                     <div className="flex items-center justify-between">
@@ -483,11 +481,14 @@ export default function CreatePostPage() {
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Preview Panel */}
-              {isPreviewMode && (
-                <div className="hidden lg:flex flex-col w-[600px] rounded-lg bg-slate-50 border bg-card text-card-foreground shadow-sm relative overflow-hidden">
+                {/* Preview Section */}
+                <div
+                  className={cn(
+                    "rounded-lg border bg-card text-card-foreground",
+                    isPreviewMode ? "block" : "hidden"
+                  )}
+                >
                   <div className="border-b p-2 relative bg-white">
                     <div className="flex items-center justify-between px-2">
                       <div className="flex gap-1">
@@ -531,8 +532,13 @@ export default function CreatePostPage() {
                           <Smartphone className="h-4 w-4" />
                         </Button>
                       </div>
-                      <Button variant="ghost" size="sm">
-                        <RotateCw className="h-4 w-4" />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsPreviewMode(false)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <X className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
@@ -644,7 +650,7 @@ export default function CreatePostPage() {
                     </div>
                   </div>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </div>
