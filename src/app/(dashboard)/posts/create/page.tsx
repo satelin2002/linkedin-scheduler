@@ -466,7 +466,7 @@ export default function CreatePostPage() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-14 w-14 rounded-full hover:bg-muted"
+                                  className="h-14 w-14 rounded-full hover:bg-muted border-muted border-2"
                                   onClick={() =>
                                     document
                                       .getElementById("image-upload")
