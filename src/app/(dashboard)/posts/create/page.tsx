@@ -36,6 +36,7 @@ import {
   PenLine,
   Bookmark,
   Check,
+  Eraser,
 } from "lucide-react";
 import {
   TypographyH4,
@@ -187,18 +188,27 @@ export default function CreatePostPage() {
                     </div>
 
                     <Tabs defaultValue="predefined" className="w-full">
-                      <TabsList className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground mb-4">
-                        <TabsTrigger value="predefined">
+                      <TabsList className="inline-flex h-12 items-center justify-center rounded-full bg-gradient-to-r from-primary/10 to-primary/5 p-1.5 w-[300px] mx-auto mb-6">
+                        <TabsTrigger
+                          value="predefined"
+                          className="inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm hover:bg-white/50 hover:text-primary/80"
+                        >
                           <Hash className="h-4 w-4 mr-2" />
                           Default Topics
                         </TabsTrigger>
-                        <TabsTrigger value="custom">
+                        <TabsTrigger
+                          value="custom"
+                          className="inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm hover:bg-white/50 hover:text-primary/80"
+                        >
                           <PenLine className="h-4 w-4 mr-2" />
                           Custom Topic
                         </TabsTrigger>
                       </TabsList>
 
-                      <TabsContent value="predefined">
+                      <TabsContent
+                        value="predefined"
+                        className="data-[state=active]:animate-in data-[state=active]:fade-in-50 data-[state=active]:slide-in-from-bottom-3"
+                      >
                         <div className="space-y-4">
                           <Select
                             onValueChange={(value) => handleTopicSelect(value)}
@@ -289,7 +299,10 @@ export default function CreatePostPage() {
                           )}
                       </TabsContent>
 
-                      <TabsContent value="custom">
+                      <TabsContent
+                        value="custom"
+                        className="data-[state=active]:animate-in data-[state=active]:fade-in-50 data-[state=active]:slide-in-from-bottom-3"
+                      >
                         <div className="space-y-4">
                           <Textarea
                             value={customTopic}
@@ -328,66 +341,81 @@ export default function CreatePostPage() {
                         <PenLine className="h-5 w-5 text-primary" />
                         <TypographyH4>Content</TypographyH4>
                       </div>
-                      <div className="flex gap-2">
-                        {/* Copy button */}
+                      <div className="flex items-center gap-2">
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={handleCopy}
-                                className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary"
-                                disabled={!content}
+                                onClick={() => setIsPreviewMode(true)}
+                                className="h-8 w-8 p-0"
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent className="bg-black text-white border-black">
+                              <span className="text-xs">Preview post</span>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleCopy()}
+                                className="h-8 w-8 p-0"
                               >
                                 {copySuccess ? (
-                                  <Check className="h-4 w-4 text-green-500" />
+                                  <Check className="h-4 w-4" />
                                 ) : (
                                   <Copy className="h-4 w-4" />
                                 )}
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent className="bg-black text-white border-black">
-                              {copySuccess ? "Copied!" : "Copy to clipboard"}
+                              <span className="text-xs">Copy content</span>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
 
-                        {/* Preview button */}
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => setIsPreviewMode(!isPreviewMode)}
-                                className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary"
+                                className="h-8 w-8 p-0"
                               >
-                                <Eye className="h-4 w-4" />
+                                <Calendar className="h-4 w-4" />
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent className="bg-black text-white border-black">
-                              Toggle preview
+                              <span className="text-xs">Schedule post</span>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
 
-                        {/* Clear button */}
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => setContent("")}
-                                className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary"
-                                disabled={!content}
+                                onClick={() => {
+                                  setContent("");
+                                  setUploadedImages([]);
+                                }}
+                                className="h-8 w-8 p-0"
                               >
-                                <Trash2 className="h-4 w-4" />
+                                <Eraser className="h-4 w-4" />
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent className="bg-black text-white border-black">
-                              Clear content
+                              <span className="text-xs">Clear all content</span>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
