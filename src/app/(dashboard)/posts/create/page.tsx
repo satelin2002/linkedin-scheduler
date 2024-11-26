@@ -182,9 +182,13 @@ export default function CreatePostPage() {
                 {/* Topics Section */}
                 <div className="rounded-lg border bg-card text-card-foreground p-6">
                   <div className="space-y-4">
-                    <div className="flex items-center gap-2 mb-6">
+                    <div className="flex items-center gap-2 mb-4">
                       <Hash className="h-5 w-5 text-primary" />
                       <TypographyH4>Select Topics</TypographyH4>
+                    </div>
+                    <div className="text-sm text-muted-foreground mb-4">
+                      Choose from our default topics or create your own custom
+                      topic to categorize your post
                     </div>
 
                     <Tabs defaultValue="predefined" className="w-full">
@@ -204,6 +208,10 @@ export default function CreatePostPage() {
                         className="data-[state=active]:animate-in data-[state=active]:fade-in-50 data-[state=active]:slide-in-from-bottom-3"
                       >
                         <div className="space-y-4">
+                          <div className="text-sm text-muted-foreground mb-4">
+                            Select a topic to generate post ideas based on your
+                            interests.
+                          </div>
                           <Select
                             onValueChange={(value) => handleTopicSelect(value)}
                           >
@@ -242,6 +250,11 @@ export default function CreatePostPage() {
                               <div className="flex items-center gap-2 mb-6">
                                 <Sparkles className="h-5 w-5 text-primary" />
                                 <TypographyH4>Generated Ideas</TypographyH4>
+                              </div>
+                              <div className="text-sm text-muted-foreground mb-4">
+                                Here are some AI-generated post ideas based on
+                                your selected topics. Click on any idea to
+                                select it, then generate a complete post.
                               </div>
 
                               {/* Ideas List */}
@@ -298,10 +311,14 @@ export default function CreatePostPage() {
                         className="data-[state=active]:animate-in data-[state=active]:fade-in-50 data-[state=active]:slide-in-from-bottom-3"
                       >
                         <div className="space-y-4">
+                          <div className="text-sm text-muted-foreground mb-4">
+                            Enter a custom topic to generate post ideas based on
+                            your interests.
+                          </div>
                           <Textarea
                             value={customTopic}
                             onChange={(e) => setCustomTopic(e.target.value)}
-                            placeholder="Enter your custom topic..."
+                            placeholder="e.g. 'AI in marketing'"
                             className="min-h-[100px] resize-none"
                           />
                           <Button
@@ -336,6 +353,23 @@ export default function CreatePostPage() {
                         <TypographyH4>Content</TypographyH4>
                       </div>
                       <div className="flex items-center gap-2">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0"
+                              >
+                                <Save className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent className="bg-black text-white border-black">
+                              <span className="text-xs">Save draft</span>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
@@ -487,13 +521,6 @@ export default function CreatePostPage() {
                           />
                         </div>
                         <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            className="hover:bg-primary/10 hover:text-primary border-primary"
-                          >
-                            <Save className="mr-2 h-4 w-4" />
-                            Save Draft
-                          </Button>
                           <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
                             <Send className="mr-2 h-4 w-4" />
                             Publish Post
