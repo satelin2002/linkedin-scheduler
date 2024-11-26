@@ -188,18 +188,12 @@ export default function CreatePostPage() {
                     </div>
 
                     <Tabs defaultValue="predefined" className="w-full">
-                      <TabsList className="inline-flex h-12 items-center justify-center rounded-full bg-gradient-to-r from-primary/10 to-primary/5 p-1.5 w-[300px] mx-auto mb-6">
-                        <TabsTrigger
-                          value="predefined"
-                          className="inline-flex items-center justify-center rounded-full px-3 py-2 text-sm font-medium transition-all data-[state=active]:bg-white  data-[state=active]:font-semibold data-[state=active]:text-primary data-[state=active]:shadow-sm hover:bg-white/50 hover:text-primary/80"
-                        >
+                      <TabsList className="mb-2">
+                        <TabsTrigger value="predefined">
                           <Hash className="h-4 w-4 mr-2" />
                           Default Topics
                         </TabsTrigger>
-                        <TabsTrigger
-                          value="custom"
-                          className="inline-flex items-center justify-center rounded-full px-3 py-2 text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-sm hover:bg-white/50 hover:text-primary/80"
-                        >
+                        <TabsTrigger value="custom">
                           <PenLine className="h-4 w-4 mr-2" />
                           Custom Topic
                         </TabsTrigger>
@@ -561,7 +555,7 @@ export default function CreatePostPage() {
                       </Button>
                     </div>
                   </div>
-                  <div className="overflow-x-auto p-4">
+                  <div className="overflow-x-auto p-4 bg-slate-50">
                     <div
                       className={cn(
                         "mx-auto bg-background transition-all duration-200 overflow-auto",

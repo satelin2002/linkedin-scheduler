@@ -76,21 +76,15 @@ export function Page() {
           <div className="max-w-7xl mx-auto">
             <Tabs
               defaultValue="my-posts"
-              className="w-full"
+              className="w-full mb-6"
               onValueChange={setActiveTab}
             >
-              <TabsList className="inline-flex h-12 items-center justify-start rounded-full bg-gradient-to-r from-primary/10 to-primary/5 p-1.5 w-[300px] mb-6">
-                <TabsTrigger
-                  value="my-posts"
-                  className="flex-1 inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:font-semibold data-[state=active]:text-primary data-[state=active]:shadow-sm hover:bg-white/50 hover:text-primary/80"
-                >
+              <TabsList>
+                <TabsTrigger value="my-posts">
                   <MailCheck className="h-4 w-4 mr-2" />
                   My Posts
                 </TabsTrigger>
-                <TabsTrigger
-                  value="saved"
-                  className="flex-1 inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:font-semibold data-[state=active]:text-primary data-[state=active]:shadow-sm hover:bg-white/50 hover:text-primary/80"
-                >
+                <TabsTrigger value="saved">
                   <BookmarkIcon className="h-4 w-4 mr-2" />
                   Saved Posts
                 </TabsTrigger>

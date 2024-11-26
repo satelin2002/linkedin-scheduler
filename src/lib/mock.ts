@@ -22,11 +22,6 @@ export const mockIdeas = [
   "Why Cloud-Native Development is the Future of Software Engineering",
   "Demystifying Large Language Models for Everyday Use Cases",
   "The Evolution of User Experience in the Era of AI",
-  "How to Balance Innovation with Technical Debt Management",
-  "The Role of Ethics in AI-Driven Decision Making",
-  "How I Built a Side Project That Became a Career Catalyst",
-  "What Every Developer Should Know About API Security",
-  "The Journey of Building a High-Performance Engineering Team",
 ];
 
 export interface PopularPost {
