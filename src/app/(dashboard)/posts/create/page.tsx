@@ -62,7 +62,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 export default function CreatePostPage() {
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [generatedIdeas, setGeneratedIdeas] = useState<string[]>([]);
@@ -159,18 +166,30 @@ export default function CreatePostPage() {
 
           {/* Existing content wrapped in relative container */}
           <div className="relative z-10">
-            <header className="flex h-16 shrink-0 items-center gap-2">
+            <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
               <div className="flex items-center justify-between w-full gap-2 px-4">
                 <div className="flex items-center gap-2">
                   <SidebarTrigger className="-ml-1" />
                   <Separator orientation="vertical" className="mr-2 h-4" />
-                  <TypographyH3>Create Posts</TypographyH3>
+                  <Breadcrumb>
+                    <BreadcrumbList>
+                      <BreadcrumbItem className="hidden md:block">
+                        <BreadcrumbLink href="#">
+                          Building Your Application
+                        </BreadcrumbLink>
+                      </BreadcrumbItem>
+                      <BreadcrumbSeparator className="hidden md:block" />
+                      <BreadcrumbItem>
+                        <BreadcrumbPage>Create New Post</BreadcrumbPage>
+                      </BreadcrumbItem>
+                    </BreadcrumbList>
+                  </Breadcrumb>
                 </div>
               </div>
             </header>
 
             <div className="px-4 pb-4">
-              <TypographyMuted className="mt-1">
+              <TypographyMuted className="mt-4">
                 Fill in the details below to create your post. Use AI to help
                 generate content or write your own.
               </TypographyMuted>

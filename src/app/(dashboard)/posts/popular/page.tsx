@@ -19,6 +19,14 @@ import {
 } from "@/components/ui/sidebar";
 import { useState } from "react";
 import { PopularPost, TopicSection, popularTopics } from "@/lib/mock";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 export default function PopularPostsPage() {
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
@@ -39,18 +47,36 @@ export default function PopularPostsPage() {
       <SidebarInset>
         <div className="relative min-h-screen w-full overflow-hidden">
           <div className="relative z-10">
-            <header className="flex h-16 shrink-0 items-center gap-2">
+            <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
               <div className="flex items-center justify-between w-full gap-2 px-4">
                 <div className="flex items-center gap-2">
                   <SidebarTrigger className="-ml-1" />
                   <Separator orientation="vertical" className="mr-2 h-4" />
-                  <TypographyH3>Popular Posts</TypographyH3>
+                  <Breadcrumb>
+                    <BreadcrumbList>
+                      <BreadcrumbItem className="hidden md:block">
+                        <BreadcrumbLink href="#">
+                          Building Your Application
+                        </BreadcrumbLink>
+                      </BreadcrumbItem>
+                      <BreadcrumbSeparator className="hidden md:block" />
+                      <BreadcrumbItem>
+                        <BreadcrumbPage>Popular Posts</BreadcrumbPage>
+                      </BreadcrumbItem>
+                    </BreadcrumbList>
+                  </Breadcrumb>
                 </div>
               </div>
             </header>
 
-            <div className="p-6">
-              <div className="max-w-7xl mx-auto space-y-8">
+            <div className="p-4">
+              <div className="max-w-7xl mx-auto space-y-4">
+                <div className="space-y-2 mt-4">
+                  <p className="text-sm text-muted-foreground">
+                    Select a topic below to explore trending posts from the
+                    community. Find inspiration and engage with popular content.
+                  </p>
+                </div>
                 {/* Topic Badges */}
                 <div className="flex flex-wrap gap-2 mb-4">
                   {popularTopics.map((topic) => (
@@ -66,7 +92,6 @@ export default function PopularPostsPage() {
                     </Badge>
                   ))}
                 </div>
-
                 {/* Posts for Selected Topic */}
                 {selectedTopic && (
                   <div>

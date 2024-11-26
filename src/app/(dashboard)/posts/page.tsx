@@ -31,6 +31,14 @@ import {
 } from "@/components/ui/tooltip";
 import Link from "next/link";
 import { userPosts } from "@/lib/mock";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 export function Page() {
   const [expandedPosts, setExpandedPosts] = useState<string[]>([]);
@@ -52,12 +60,24 @@ export function Page() {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2">
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           <div className="flex items-center justify-between w-full gap-2 px-4">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="-ml-1" />
               <Separator orientation="vertical" className="mr-2 h-4" />
-              <TypographyH3>Posts</TypographyH3>
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem className="hidden md:block">
+                    <BreadcrumbLink href="#">
+                      Building Your Application
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator className="hidden md:block" />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>Posts</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
             </div>
 
             <Link href="/posts/create">
@@ -90,6 +110,23 @@ export function Page() {
                 </TabsTrigger>
               </TabsList>
             </Tabs>
+            <div className="space-y-2 mb-6">
+              {activeTab === "my-posts" ? (
+                <>
+                  <p className="text-sm text-muted-foreground">
+                    View and manage all the posts you've created. Edit, delete,
+                    or share your content with your network.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-muted-foreground">
+                    Access posts you've bookmarked for later. Keep track of
+                    content that inspires you or that you want to reference.
+                  </p>
+                </>
+              )}
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredPosts.map((post) => (

@@ -52,12 +52,16 @@ const data = {
       isActive: true,
       items: [
         {
-          title: "History",
-          url: "#",
+          title: "Create Post",
+          url: "/posts/create",
         },
         {
-          title: "Starred",
-          url: "#",
+          title: "Popular Posts",
+          url: "/posts/popular",
+        },
+        {
+          title: "My Posts",
+          url: "/posts",
         },
         {
           title: "Settings",
@@ -65,7 +69,6 @@ const data = {
         },
       ],
     },
-
     {
       title: "Settings",
       url: "#",
