@@ -4,7 +4,14 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Bookmark, Send, Calendar, Lightbulb, PenSquare } from "lucide-react";
+import {
+  Bookmark,
+  Send,
+  Calendar,
+  Lightbulb,
+  PenSquare,
+  Plus,
+} from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -27,8 +34,11 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function PopularPostsPage() {
+  const router = useRouter();
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [expandedPosts, setExpandedPosts] = useState<string[]>([]);
 
@@ -39,6 +49,13 @@ export default function PopularPostsPage() {
         ? prev.filter((id) => id !== postId)
         : [...prev, postId]
     );
+  };
+
+  // Add function to handle post navigation
+  const handlePostClick = (content: string) => {
+    // Encode the content to safely pass it in the URL
+    const encodedContent = encodeURIComponent(content);
+    router.push(`/posts/create?content=${encodedContent}`);
   };
 
   return (
@@ -66,6 +83,16 @@ export default function PopularPostsPage() {
                     </BreadcrumbList>
                   </Breadcrumb>
                 </div>
+
+                <Link href="/posts/create">
+                  <Button
+                    className="bg-black hover:bg-black/90 text-white"
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Post
+                  </Button>
+                </Link>
               </div>
             </header>
 
@@ -221,14 +248,17 @@ export default function PopularPostsPage() {
                                         <TooltipTrigger asChild>
                                           <Button
                                             size="sm"
-                                            className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                                            className="bg-black hover:bg-black/90 text-white"
+                                            onClick={() =>
+                                              handlePostClick(post.content)
+                                            }
                                           >
                                             <Send className="h-4 w-4 mr-2" />
                                             Post
                                           </Button>
                                         </TooltipTrigger>
                                         <TooltipContent className="bg-black text-white border-black">
-                                          Share post
+                                          Edit and share post
                                         </TooltipContent>
                                       </Tooltip>
                                     </TooltipProvider>

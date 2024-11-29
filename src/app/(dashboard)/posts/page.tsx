@@ -39,8 +39,10 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { useRouter } from "next/navigation";
 
 export function Page() {
+  const router = useRouter();
   const [expandedPosts, setExpandedPosts] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState("my-posts");
 
@@ -55,6 +57,14 @@ export function Page() {
   const filteredPosts = userPosts.filter((post) =>
     activeTab === "saved" ? post.saved : !post.saved
   );
+
+  const handlePostClick = (content: string, topics: string[]) => {
+    const encodedContent = encodeURIComponent(content);
+    const encodedTopics = encodeURIComponent(JSON.stringify(topics));
+    router.push(
+      `/posts/create?content=${encodedContent}&topics=${encodedTopics}`
+    );
+  };
 
   return (
     <SidebarProvider>
@@ -134,16 +144,6 @@ export function Page() {
                   key={post.id}
                   className="rounded-lg border bg-card text-card-foreground shadow-sm h-fit"
                 >
-                  {/* Card Header */}
-                  <div className="p-4 border-b flex items-center gap-2">
-                    <div className="rounded-full bg-primary/10 p-1.5">
-                      <Lightbulb className="h-4 w-4 text-primary" />
-                    </div>
-                    <h3 className="font-medium text-sm">
-                      Share an idea with your network
-                    </h3>
-                  </div>
-
                   {/* Post Content */}
                   <div className="p-4">
                     <div className="prose prose-sm max-w-none">
@@ -215,6 +215,9 @@ export function Page() {
                                 variant="ghost"
                                 size="sm"
                                 className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary"
+                                onClick={() =>
+                                  handlePostClick(post.content, post.topics)
+                                }
                               >
                                 <PenSquare className="h-4 w-4" />
                               </Button>
@@ -246,14 +249,17 @@ export function Page() {
                           <TooltipTrigger asChild>
                             <Button
                               size="sm"
-                              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                              className="bg-black hover:bg-black/90 text-white"
+                              onClick={() =>
+                                handlePostClick(post.content, post.topics)
+                              }
                             >
                               <Send className="h-4 w-4 mr-2" />
                               Post
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent className="bg-black text-white border-black">
-                            Share post
+                            Edit and share post
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>

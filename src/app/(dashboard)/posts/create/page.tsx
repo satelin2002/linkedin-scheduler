@@ -70,11 +70,18 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useSearchParams } from "next/navigation";
+
 export default function CreatePostPage() {
+  const searchParams = useSearchParams();
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [generatedIdeas, setGeneratedIdeas] = useState<string[]>([]);
   const [selectedIdea, setSelectedIdea] = useState<string>("");
-  const [content, setContent] = useState("");
+  const [content, setContent] = useState<string>(() => {
+    const contentParam = searchParams.get("content");
+    return contentParam ? decodeURIComponent(contentParam) : "";
+  });
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [activePreview, setActivePreview] = useState<
@@ -249,7 +256,7 @@ export default function CreatePostPage() {
                           {selectedTopics.length > 0 && (
                             <Button
                               onClick={handleGenerateIdeas}
-                              className="w-full"
+                              className="w-full bg-black hover:bg-black/90 text-white"
                               disabled={isGenerating}
                             >
                               {isGenerating ? (
@@ -262,7 +269,7 @@ export default function CreatePostPage() {
                           )}
                         </div>
 
-                        {/* Generated Ideas Section - Hide completely when Custom tab is selected */}
+                        {/* Generated Ideas Section */}
                         {activeTab !== "custom" &&
                           generatedIdeas.length > 0 && (
                             <div className="space-y-4 mt-6">
@@ -271,56 +278,65 @@ export default function CreatePostPage() {
                                 <TypographyH4>Generated Ideas</TypographyH4>
                               </div>
                               <div className="text-sm text-muted-foreground mb-4">
-                                Here are some AI-generated post ideas based on
-                                your selected topics. Click on any idea to
-                                select it, then generate a complete post.
+                                Here are{" "}
+                                <span className="font-bold">
+                                  {generatedIdeas.length}
+                                </span>{" "}
+                                AI-generated post ideas based on your selected
+                                topics. Click on any idea to select it.
                               </div>
 
-                              {/* Ideas List */}
-                              <div className="space-y-3">
-                                {generatedIdeas.map((idea) => (
-                                  <div
-                                    key={idea}
-                                    onClick={() => setSelectedIdea(idea)}
-                                    className={cn(
-                                      "p-2 rounded-lg border-2 cursor-pointer transition-all",
-                                      "text-sm flex items-center gap-3",
-                                      selectedIdea === idea
-                                        ? "bg-primary/10 border-primary text-primary"
-                                        : "hover:bg-primary/5 hover:border-primary/50 border-border"
-                                    )}
-                                  >
-                                    <Lightbulb
-                                      className={cn(
-                                        "h-4 w-4 flex-shrink-0",
-                                        selectedIdea === idea
-                                          ? "text-primary"
-                                          : "text-muted-foreground"
-                                      )}
-                                    />
-                                    <span className="flex-1">{idea}</span>
-                                    {selectedIdea === idea && (
-                                      <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                                    )}
+                              {/* Ideas Container with Border */}
+                              <div className="border rounded-lg p-4 bg-card">
+                                <ScrollArea className="h-[250px]">
+                                  <div className="space-y-3 pr-4">
+                                    {generatedIdeas.map((idea) => (
+                                      <div
+                                        key={idea}
+                                        onClick={() => setSelectedIdea(idea)}
+                                        className={cn(
+                                          "p-2 rounded-lg border-2 cursor-pointer transition-all",
+                                          "text-sm flex items-center gap-3",
+                                          selectedIdea === idea
+                                            ? "bg-primary/10 border-primary text-primary"
+                                            : "hover:bg-primary/5 hover:border-primary/50 border-border"
+                                        )}
+                                      >
+                                        <Lightbulb
+                                          className={cn(
+                                            "h-4 w-4 flex-shrink-0",
+                                            selectedIdea === idea
+                                              ? "text-primary"
+                                              : "text-muted-foreground"
+                                          )}
+                                        />
+                                        <span className="flex-1">{idea}</span>
+                                        {selectedIdea === idea && (
+                                          <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                                        )}
+                                      </div>
+                                    ))}
                                   </div>
-                                ))}
-                              </div>
+                                </ScrollArea>
 
-                              {/* Generate Post Button - Only show when idea is selected */}
-                              {selectedIdea && (
-                                <Button
-                                  onClick={handleGeneratePost}
-                                  className="w-full mt-4"
-                                  disabled={isGenerating}
-                                >
-                                  {isGenerating ? (
-                                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                                  ) : (
-                                    <PenLine className="h-4 w-4 mr-2" />
-                                  )}
-                                  Generate Post
-                                </Button>
-                              )}
+                                {/* Generate Post Button - Inside the container */}
+                                {selectedIdea && (
+                                  <div className="pt-4 border-t mt-4">
+                                    <Button
+                                      onClick={handleGeneratePost}
+                                      className="w-full bg-black hover:bg-black/90 text-white"
+                                      disabled={isGenerating}
+                                    >
+                                      {isGenerating ? (
+                                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                                      ) : (
+                                        <PenLine className="h-4 w-4 mr-2" />
+                                      )}
+                                      Generate Post
+                                    </Button>
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           )}
                       </TabsContent>
@@ -342,7 +358,7 @@ export default function CreatePostPage() {
                           />
                           <Button
                             onClick={handleGeneratePost}
-                            className="w-full"
+                            className="w-full bg-black hover:bg-black/90 text-white"
                             disabled={!customTopic.trim()}
                           >
                             <Wand2 className="h-4 w-4 mr-2" />
@@ -501,7 +517,7 @@ export default function CreatePostPage() {
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
                         placeholder="Write your post content here..."
-                        className="min-h-[300px]"
+                        className="min-h-[500px]"
                       />
 
                       {/* Action Buttons */}

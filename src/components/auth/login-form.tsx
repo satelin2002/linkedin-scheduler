@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Icons } from "../ui/icons";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
+import { signIn } from "next-auth/react";
 
 interface LoginFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -14,15 +15,36 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [emailInput, setEmailInput] = React.useState<string>("");
 
+  async function handleOAuthSignIn(provider: "google" | "linkedin") {
+    setIsLoading(true);
+    try {
+      await signIn(provider, {
+        callbackUrl: "/dashboard",
+      });
+    } catch (error) {
+      console.error(`${provider} authentication error:`, error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   return (
     <div className={cn("grid gap-6", className)} {...props}>
       <div className="grid gap-4">
         <div className="grid gap-2">
-          <Button variant="outline" disabled={isLoading}>
+          <Button
+            variant="outline"
+            disabled={isLoading}
+            onClick={() => handleOAuthSignIn("google")}
+          >
             <Icons.google className="mr-2 h-4 w-4" />
             Continue with Google
           </Button>
-          <Button variant="outline" disabled={isLoading}>
+          <Button
+            variant="outline"
+            disabled={isLoading}
+            onClick={() => handleOAuthSignIn("linkedin")}
+          >
             <Icons.linkedin className="mr-2 h-4 w-4" />
             Continue with LinkedIn
           </Button>

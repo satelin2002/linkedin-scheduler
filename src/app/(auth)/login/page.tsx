@@ -1,4 +1,6 @@
+import { auth } from "@/lib/auth";
 import { LoginForm } from "@/components/auth/login-form";
+import { redirect } from "next/navigation";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -6,7 +8,15 @@ export const metadata: Metadata = {
   description: "Login to your account",
 };
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  // Check if user is already authenticated
+  const session = await auth();
+
+  // If already logged in, redirect to dashboard
+  if (session?.user) {
+    redirect("/dashboard");
+  }
+
   return (
     <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
       <div className="flex flex-col space-y-2 text-center">

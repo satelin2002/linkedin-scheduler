@@ -7,8 +7,20 @@ import { prisma } from "./prisma";
 export const authConfig = {
   providers: [Google, LinkedIn],
   adapter: PrismaAdapter(prisma),
+  debug: true,
   pages: {
     signIn: "/login",
+  },
+  logger: {
+    error(code, ...message) {
+      console.error(code, message);
+    },
+    warn(code, ...message) {
+      console.warn(code, message);
+    },
+    debug(code, ...message) {
+      console.debug(code, message);
+    },
   },
   callbacks: {
     // authorized({ auth, request: { nextUrl } }) {
