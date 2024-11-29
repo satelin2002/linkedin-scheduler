@@ -110,7 +110,7 @@ export default function PopularPostsPage() {
                     <Badge
                       key={topic.name}
                       variant={
-                        selectedTopic === topic.name ? "default" : "secondary"
+                        selectedTopic === topic.name ? "outline" : "secondary"
                       }
                       className="cursor-pointer px-4 py-1.5 text-sm"
                       onClick={() => setSelectedTopic(topic.name)}
@@ -248,9 +248,13 @@ export default function PopularPostsPage() {
                                         <TooltipTrigger asChild>
                                           <Button
                                             size="sm"
-                                            className="bg-black hover:bg-black/90 text-white"
+                                            variant="outline"
+                                            className="hover:bg-secondary/20"
                                             onClick={() =>
-                                              handlePostClick(post.content)
+                                              handlePostClick(
+                                                post.content,
+                                                post.topics
+                                              )
                                             }
                                           >
                                             <Send className="h-4 w-4 mr-2" />

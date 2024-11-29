@@ -15,11 +15,11 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
-// const inter = Inter({
-//   subsets: ["latin"],
-//   variable: "--font-poppins",
-//   weight: ["400", "500", "600", "700"],
-// });
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-poppins",
+  weight: ["400", "500", "600", "700"],
+});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -33,9 +33,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.className} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${inter.className} ${geistMono.variable} antialiased`}>
         {children}
       </body>
     </html>

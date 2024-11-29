@@ -19,6 +19,8 @@ import {
   Signpost,
   MailCheck,
   BarChart3,
+  Clock,
+  Trash2,
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -189,81 +191,41 @@ export function Page() {
                   </div>
 
                   {/* Footer */}
-                  <div className="p-4 border-t">
-                    <div className="flex justify-between items-center">
-                      <div className="flex gap-3">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary"
-                              >
-                                <Calendar className="h-4 w-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent className="bg-black text-white border-black">
-                              Schedule post
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary"
-                                onClick={() =>
-                                  handlePostClick(post.content, post.topics)
-                                }
-                              >
-                                <PenSquare className="h-4 w-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent className="bg-black text-white border-black">
-                              Edit post
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary"
-                              >
-                                <BarChart3 className="h-4 w-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent className="bg-black text-white border-black">
-                              View analytics
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                  <div className="flex items-center justify-between p-4 bg-slate-50 border-t rounded-b-lg">
+                    <div className="flex flex-wrap items-center gap-4">
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 hover:bg-secondary/20"
+                        >
+                          <Calendar className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 hover:bg-secondary/20"
+                        >
+                          <Clock className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 hover:bg-secondary/20"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              size="sm"
-                              className="bg-black hover:bg-black/90 text-white"
-                              onClick={() =>
-                                handlePostClick(post.content, post.topics)
-                              }
-                            >
-                              <Send className="h-4 w-4 mr-2" />
-                              Post
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent className="bg-black text-white border-black">
-                            Edit and share post
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
                     </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="hover:bg-secondary/20"
+                      onClick={() => handlePostClick(post.content, post.topics)}
+                    >
+                      <Send className="h-4 w-4 mr-2" />
+                      Post
+                    </Button>
                   </div>
                 </div>
               ))}

@@ -56,8 +56,9 @@ export default function CalendarPage() {
 
             <Link href="/posts/create">
               <Button
-                className="bg-black hover:bg-black/90 text-white"
+                variant="outline"
                 size="sm"
+                className="text-black hover:bg-secondary/20"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Create Post
