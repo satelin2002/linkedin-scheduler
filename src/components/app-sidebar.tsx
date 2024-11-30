@@ -64,6 +64,11 @@ const data = {
           url: "/posts",
         },
         {
+          title: "Calendar",
+          url: "/posts/calendar",
+        },
+
+        {
           title: "Settings",
           url: "#",
         },

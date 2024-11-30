@@ -556,7 +556,10 @@ export default function CreatePostPage() {
                           />
                         </div>
                         <div className="flex gap-2">
-                          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                          <Button
+                            size="lg"
+                            className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                          >
                             <Send className="mr-2 h-4 w-4" />
                             Publish Post
                           </Button>

@@ -87,7 +87,7 @@ export default function PopularPostsPage() {
                 <Link href="/posts/create">
                   <Button
                     className="bg-black hover:bg-black/90 text-white"
-                    size="sm"
+                    size="default"
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Create Post
@@ -110,7 +110,7 @@ export default function PopularPostsPage() {
                     <Badge
                       key={topic.name}
                       variant={
-                        selectedTopic === topic.name ? "outline" : "secondary"
+                        selectedTopic === topic.name ? "default" : "secondary"
                       }
                       className="cursor-pointer px-4 py-1.5 text-sm"
                       onClick={() => setSelectedTopic(topic.name)}
@@ -191,7 +191,7 @@ export default function PopularPostsPage() {
                                 </div>
 
                                 {/* Footer - with standardized spacing */}
-                                <div className="p-4 border-t mt-auto">
+                                <div className="p-4 border-t mt-auto bg-slate-50   rounded-b-lg">
                                   <div className="flex justify-between items-center">
                                     <div className="flex gap-3">
                                       <TooltipProvider>
@@ -251,10 +251,7 @@ export default function PopularPostsPage() {
                                             variant="outline"
                                             className="hover:bg-secondary/20"
                                             onClick={() =>
-                                              handlePostClick(
-                                                post.content,
-                                                post.topics
-                                              )
+                                              handlePostClick(post.content)
                                             }
                                           >
                                             <Send className="h-4 w-4 mr-2" />

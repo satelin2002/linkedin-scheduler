@@ -53,7 +53,7 @@ export function Calendar({ currentDate }: CalendarProps) {
       content:
         "5 Tips for Building a Strong Personal Brand on LinkedIn:\n1. Consistent Content\n2. Authentic Voice\n3. Engage Daily\n4. Share Expertise\n5. Quality Network",
       topics: ["Personal Branding", "Tips"],
-      scheduledFor: new Date(2024, 11, 18, 9, 0),
+      scheduledFor: new Date(2024, 10, 18, 9, 0),
     },
     {
       id: "4",
@@ -74,21 +74,21 @@ export function Calendar({ currentDate }: CalendarProps) {
       content:
         "New blog post: 'The Impact of AI on Content Creation' - Read how AI is transforming the way we create and distribute content. Link in comments!",
       topics: ["Blog", "AI"],
-      scheduledFor: new Date(2024, 11, 25, 15, 30),
+      scheduledFor: new Date(2024, 10, 25, 15, 30),
     },
     {
       id: "7",
       content:
         "Weekly tech tip: Use keyboard shortcuts to boost your productivity. What's your favorite shortcut? Share below! 💻 #ProductivityTips #Tech",
       topics: ["Tech Tips", "Productivity"],
-      scheduledFor: new Date(2024, 2, 28, 10, 30),
+      scheduledFor: new Date(2024, 10, 28, 10, 30),
     },
     {
       id: "8",
       content:
         "Proud to be featured in @TechMagazine's '30 Under 30' list! Grateful for this recognition and excited for what's ahead. 🏆",
       topics: ["Achievement", "Recognition"],
-      scheduledFor: new Date(2024, 11, 25, 16, 0),
+      scheduledFor: new Date(2024, 10, 25, 16, 0),
     },
   ];
 
