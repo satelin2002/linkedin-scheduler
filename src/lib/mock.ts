@@ -397,7 +397,7 @@ export const userPosts = [
   {
     id: "1",
     content:
-      "🚀 Just launched our new AI-powered feature! Excited to share that our team has been working on implementing machine learning algorithms to enhance user experience. What are your thoughts on AI in product development? #AI #Innovation #Tech",
+      "🚀 Just launched our new AI-powered feature! Excited to share that our team has been working on implementing machine learning algorithms to enhance user experience. What are your thoughts on AI in product development?",
     topics: ["🤖 AI", "💡 Innovation"],
     timestamp: "2024-02-24T09:30:00Z",
     saved: false,
@@ -406,7 +406,7 @@ export const userPosts = [
   {
     id: "2",
     content:
-      "📊 Data-driven decision making is key to success. Here's how we increased our conversion rate by 40% using A/B testing and user behavior analytics. Would love to hear your experiences with data analytics! #DataScience #Growth",
+      "📊 Data-driven decision making is key to success. Here's how we increased our conversion rate by 40% using A/B testing and user behavior analytics.",
     topics: ["📊 Analytics", "📈 Growth"],
     timestamp: "2024-02-23T14:20:00Z",
     saved: true,
@@ -415,10 +415,109 @@ export const userPosts = [
   {
     id: "3",
     content:
-      "🎯 Product-market fit is crucial for startups. We spent 3 months interviewing customers and iterating on our MVP. The insights we gained were invaluable. What strategies do you use to validate your product? #StartupLife #ProductDevelopment",
+      "🎯 Product-market fit is crucial for startups. We spent 3 months interviewing customers and iterating on our MVP. The insights we gained were invaluable.",
     topics: ["🚀 Startup", "💡 Product"],
     timestamp: "2024-02-22T11:15:00Z",
     saved: false,
+    status: "draft",
+  },
+  {
+    id: "4",
+    content:
+      "💡 5 Key Trends in AI Development for 2024: 1. Multimodal AI Models, 2. Edge Computing Integration, 3. AI Governance Frameworks, 4. Sustainable AI Solutions, 5. Hybrid AI Architectures",
+    topics: ["🤖 AI", "🔮 Trends"],
+    timestamp: "2024-03-01T10:00:00Z",
+    saved: false,
+    status: "scheduled",
+  },
+  {
+    id: "5",
+    content:
+      "🌟 Celebrating a major milestone! Our platform just hit 1 million active users. Thank you to our amazing community for your continued support and feedback.",
+    topics: ["🎉 Milestones", "🚀 Growth"],
+    timestamp: "2024-02-20T15:45:00Z",
+    saved: true,
+    status: "published",
+  },
+  {
+    id: "6",
+    content:
+      "[Draft] Working on a comprehensive guide to modern software architecture patterns. Would love your input on which patterns you find most useful in production environments.",
+    topics: ["🏗️ Architecture", "💻 Development"],
+    timestamp: "2024-02-25T08:20:00Z",
+    saved: false,
+    status: "draft",
+  },
+  {
+    id: "7",
+    content:
+      "📱 Mobile-first design principles that actually work: Insights from redesigning our entire app interface. Full case study coming next week!",
+    topics: ["🎨 Design", "📱 Mobile"],
+    timestamp: "2024-03-05T09:00:00Z",
+    saved: false,
+    status: "scheduled",
+  },
+  {
+    id: "8",
+    content:
+      "🔐 Security best practices in modern web applications: A deep dive into our latest security audit findings and implementations.",
+    topics: ["🔐 Security", "🌐 Web"],
+    timestamp: "2024-02-21T16:30:00Z",
+    saved: true,
+    status: "published",
+  },
+  {
+    id: "9",
+    content:
+      "[Draft] Exploring the impact of WebAssembly on web application performance. Initial benchmarks showing promising results.",
+    topics: ["⚡ Performance", "🌐 Web"],
+    timestamp: "2024-02-26T11:45:00Z",
+    saved: false,
+    status: "draft",
+  },
+  {
+    id: "10",
+    content:
+      "[Draft] 🤔 Thoughts on microservices vs monoliths? Working on an article comparing our journey from monolith to microservices. Key points to cover: scalability, maintenance overhead, team structure, deployment complexity.",
+    topics: ["🏗️ Architecture", "📝 Development"],
+    timestamp: "2024-02-27T14:20:00Z",
+    saved: false,
+    status: "draft",
+  },
+  {
+    id: "11",
+    content:
+      "[Draft] 📚 Building a Learning Culture in Tech Teams - Tips from our engineering department: 1. Weekly knowledge sharing sessions 2. Rotation programs 3. Innovation time 4. Mentorship pairs",
+    topics: ["👥 Leadership", "📚 Learning"],
+    timestamp: "2024-02-28T09:15:00Z",
+    saved: true,
+    status: "draft",
+  },
+  {
+    id: "12",
+    content:
+      "[Draft] 🔄 DevOps Evolution: Our path to continuous deployment. Need to add more details about: - CI/CD pipeline improvements - Monitoring setup - Incident response automation - Testing strategies",
+    topics: ["🔄 DevOps", "⚡ Automation"],
+    timestamp: "2024-02-28T16:45:00Z",
+    saved: false,
+    status: "draft",
+  },
+  {
+    id: "13",
+    content:
+      "[Draft] 💭 Considering writing about our experience with GraphQL adoption. Key points: Schema design, Performance optimization, Client-side caching, Backend integration challenges...",
+    topics: ["🔗 API", "💻 Development"],
+    timestamp: "2024-02-29T10:30:00Z",
+    saved: false,
+    status: "draft",
+  },
+  {
+    id: "14",
+    content:
+      "[Draft] 🌐 Web Performance Optimization Techniques - Initial outline: 1. Image optimization strategies 2. Code splitting approaches 3. Caching strategies 4. Runtime performance improvements",
+    topics: ["⚡ Performance", "🌐 Web"],
+    timestamp: "2024-02-29T13:20:00Z",
+    saved: true,
     status: "draft",
   },
 ];
