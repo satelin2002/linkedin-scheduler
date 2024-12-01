@@ -255,7 +255,7 @@ export function Page() {
                           </div>
 
                           <div className="flex-1 min-w-0 overflow-hidden">
-                            <div className="text-sm text-foreground overflow-hidden font-medium">
+                            <div className="text-sm text-foreground overflow-hidden">
                               <p className="truncate pr-4">
                                 {post.content.split(" ").slice(0, 15).join(" ")}
                                 {post.content.split(" ").length > 15
