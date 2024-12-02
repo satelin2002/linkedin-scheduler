@@ -142,28 +142,28 @@ export function Page() {
                   <TabsList className="inline-flex w-fit bg-white border rounded-lg p-0">
                     <TabsTrigger
                       value="all"
-                      className="px-6 rounded-md data-[state=active]:bg-secondary/80 data-[state=active]:border-primary/70 data-[state=active]:border data-[state=active]:text-primary"
+                      className="px-6 rounded-md data-[state=active]:bg-secondary/80 data-[state=active]:border-primary/70 data-[state=active]:font-semibold data-[state=active]:border data-[state=active]:text-primary"
                     >
                       <GalleryVerticalEnd className="h-4 w-4 mr-2" />
                       All Posts
                     </TabsTrigger>
                     <TabsTrigger
                       value="scheduled"
-                      className="px-6 rounded-md data-[state=active]:bg-secondary/80 data-[state=active]:border-primary/70 data-[state=active]:border data-[state=active]:text-primary"
+                      className="px-6 rounded-md data-[state=active]:bg-secondary/80 data-[state=active]:border-primary/70 data-[state=active]:font-semibold data-[state=active]:border data-[state=active]:text-primary"
                     >
                       <FolderClock className="h-4 w-4 mr-2" />
                       Scheduled
                     </TabsTrigger>
                     <TabsTrigger
                       value="published"
-                      className="px-6 rounded-md data-[state=active]:bg-secondary/80 data-[state=active]:border-primary/70 data-[state=active]:border data-[state=active]:text-primary"
+                      className="px-6 rounded-md data-[state=active]:bg-secondary/80 data-[state=active]:border-primary/70 data-[state=active]:font-semibold data-[state=active]:border data-[state=active]:text-primary"
                     >
                       <BookCheck className="h-4 w-4 mr-2" />
                       Published
                     </TabsTrigger>
                     <TabsTrigger
                       value="drafts"
-                      className="px-6 rounded-md data-[state=active]:bg-secondary/80 data-[state=active]:border-primary/70 data-[state=active]:border data-[state=active]:text-primary"
+                      className="px-6 rounded-md data-[state=active]:bg-secondary/80 data-[state=active]:border-primary/70 data-[state=active]:font-semibold data-[state=active]:border data-[state=active]:text-primary"
                     >
                       <FolderPen className="h-4 w-4 mr-2" />
                       Drafts
@@ -254,7 +254,7 @@ export function Page() {
 
                           <div className="flex-1 min-w-0 overflow-hidden space-y-3 sm:space-y-0">
                             <div className="text-sm text-foreground overflow-hidden">
-                              <p className="truncate pr-4 pb-1">
+                              <p className="truncate pr-4 pb-1 text-black">
                                 {post.content.split(" ").slice(0, 15).join(" ")}
                                 {post.content.split(" ").length > 15
                                   ? "..."

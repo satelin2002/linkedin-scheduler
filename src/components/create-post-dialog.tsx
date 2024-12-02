@@ -50,6 +50,7 @@ import { cn } from "@/lib/utils";
 import LikeIcon from "./ui/like";
 import HeartIcon from "./ui/hearts";
 import ThumbsUpIcon from "./ui/thumbs-up";
+import { Textarea } from "./ui/textarea";
 
 export function CreatePostDialog() {
   const [selectedTopic, setSelectedTopic] = useState<string>("");
@@ -154,14 +155,14 @@ export function CreatePostDialog() {
                 <TabsList className="grid w-full grid-cols-2 bg-white border rounded-lg p-0">
                   <TabsTrigger
                     value="default"
-                    className="px-6 rounded-md data-[state=active]:bg-secondary/80 data-[state=active]:border-primary/70 data-[state=active]:border data-[state=active]:text-primary"
+                    className="px-6 rounded-md data-[state=active]:bg-secondary/80 data-[state=active]:border-primary/70 data-[state=active]:font-semibold data-[state=active]:border data-[state=active]:text-primary"
                   >
                     <Hash className="h-4 w-4 mr-2" />
                     Topics
                   </TabsTrigger>
                   <TabsTrigger
                     value="custom"
-                    className="px-6 rounded-md data-[state=active]:bg-secondary/80 data-[state=active]:border-primary/70 data-[state=active]:border data-[state=active]:text-primary"
+                    className="px-6 rounded-md data-[state=active]:bg-secondary/80 data-[state=active]:border-primary/70 data-[state=active]:font-semibold data-[state=active]:border data-[state=active]:text-primary"
                   >
                     <FileUser className="h-4 w-4 mr-2" />
                     Custom Topics
@@ -172,6 +173,10 @@ export function CreatePostDialog() {
                   {/* Step 1: Topic Selection */}
                   <div className="space-y-2">
                     <h3 className="text-sm font-medium">1. Choose a Topic</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Select a topic that resonates with your audience and
+                      expertise
+                    </p>
                     <div className="flex gap-2">
                       <Select
                         value={selectedTopic}
@@ -212,6 +217,10 @@ export function CreatePostDialog() {
                   {generatedIdeas.length > 0 && (
                     <div className="space-y-2">
                       <h3 className="text-sm font-medium">2. Choose an Idea</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Pick an AI-generated idea to create engaging content for
+                        your post
+                      </p>
                       <div className="flex gap-2">
                         <Select
                           value={selectedIdea}
@@ -255,7 +264,7 @@ export function CreatePostDialog() {
                   <div className="space-y-4">
                     <div>
                       <h3 className="text-sm font-medium mb-2">Your Topic</h3>
-                      <textarea
+                      <Textarea
                         value={customContent}
                         onChange={(e) => setCustomContent(e.target.value)}
                         className="w-full min-h-[50px] p-3 rounded-md border"
@@ -286,8 +295,12 @@ export function CreatePostDialog() {
 
               {/* Content Area with Action Icons */}
               <div className="space-y-2 mt-4">
+                <h3 className="text-sm font-medium">Content</h3>
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-medium">Content</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Review and customize your post content before publishing
+                  </p>
+
                   <div className="flex items-center gap-2">
                     <TooltipProvider>
                       <Tooltip>
@@ -350,7 +363,7 @@ export function CreatePostDialog() {
                   </div>
                 </div>
 
-                <textarea
+                <Textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   className="w-full min-h-[300px] p-3 rounded-md border"
