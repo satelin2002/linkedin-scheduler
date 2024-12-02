@@ -234,7 +234,7 @@ export function Page() {
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       onKeyDown={handleSearch}
-                      placeholder="Search posts and press Enter..."
+                      placeholder="Search posts and press ↵"
                       className="pl-9 h-9 w-full bg-white"
                     />
                   </div>

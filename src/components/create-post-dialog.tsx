@@ -55,6 +55,7 @@ import ThumbsUpIcon from "./ui/thumbs-up";
 import { Textarea } from "./ui/textarea";
 import { toast } from "sonner";
 import { Post } from "@prisma/client";
+import { Separator } from "@/components/ui/separator";
 
 interface CreatePostDialogProps {
   post?: Post | null;
@@ -268,15 +269,19 @@ export function CreatePostDialog({
   };
 
   const handleOpenDialog = () => {
-    if (post) {
-      setContent(post.content);
-      setCurrentDraftId(post.id);
-      // Set other fields from post
-    } else {
-      setContent("");
-      setCurrentDraftId(null);
-      // Reset other fields
-    }
+    // Reset all states to initial values
+    setContent("");
+    setCurrentDraftId(null);
+    setSelectedTopic("");
+    setGeneratedIdeas([]);
+    setSelectedIdea("");
+    setUploadedImages([]);
+    setPostTopics([]);
+    setCustomContent("");
+    setIsExpanded(false);
+    setShowPreview(false);
+    setPreviewDevice("desktop");
+    setTopicSearch("");
   };
 
   const handleCloseDialog = () => {
@@ -332,7 +337,7 @@ export function CreatePostDialog({
           Create Post
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-6xl max-h-[76vh] p-0 flex flex-col">
+      <DialogContent className="max-w-6xl max-h-[80vh] p-0 flex flex-col">
         <DialogHeader className="px-6 pt-6">
           <DialogTitle>{post ? "Edit Post" : "Create New Post"}</DialogTitle>
           <DialogDescription>
@@ -532,29 +537,82 @@ export function CreatePostDialog({
                 </TabsContent>
               </Tabs>
 
-              {/* Content Area with Action Icons */}
-              <div className="space-y-2 mt-4">
-                <h3 className="text-sm font-medium flex items-center">
-                  Content
-                  <CircleHelp className="ml-2 h-4 w-4 text-muted-foreground" />
-                </h3>
-                <div className="flex items-center justify-between">
+              {/* Add separator and spacing */}
+              <div className="my-4">
+                {/* Content Area with Action Icons */}
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium flex items-center">
+                    Content
+                    <CircleHelp className="ml-2 h-4 w-4 text-muted-foreground" />
+                  </h3>
                   <p className="text-sm text-muted-foreground">
                     Review and customize your post content
                   </p>
 
-                  <div className="flex items-center gap-2">
-                    {/* Hidden file input */}
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleImageUpload}
-                      accept="image/*"
-                      className="hidden"
-                      multiple
-                    />
+                  {/* Hidden file input */}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageUpload}
+                    accept="image/*"
+                    className="hidden"
+                    multiple
+                  />
 
+                  {/* Uploaded Images Preview */}
+                  {uploadedImages.length > 0 && (
+                    <div className="mb-4">
+                      <div className="grid grid-cols-4 gap-4">
+                        {uploadedImages.map((image, index) => (
+                          <div
+                            key={index}
+                            className="relative group aspect-square"
+                          >
+                            <img
+                              src={image}
+                              alt={`Uploaded ${index + 1}`}
+                              className="w-full h-full object-cover rounded-md"
+                            />
+                            <button
+                              onClick={() => removeImage(index)}
+                              className="absolute -top-2 -right-2 p-1.5 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <Textarea
+                    placeholder="Write your post content..."
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    className="min-h-[200px] resize-none whitespace-pre-wrap font-[inherit]"
+                  />
+
+                  {/* Action Icons moved below textarea */}
+                  <div className="flex items-center justify-between pt-2   mt-2">
                     <div className="flex items-center gap-2">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={handleImageClick}
+                              className="h-8 w-8 p-0"
+                            >
+                              <ImagePlus className="h-4 w-4 text-muted-foreground" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Upload image from device</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -563,7 +621,13 @@ export function CreatePostDialog({
                               size="sm"
                               onClick={handleGenerateImage}
                               disabled={isGeneratingImage}
-                              className="h-8 flex items-center gap-2"
+                              className={cn(
+                                "h-8 flex items-center gap-2",
+                                "bg-gradient-to-r from-indigo-500/10 to-indigo-600/10",
+                                "hover:from-indigo-500/20 hover:to-purple-500/20",
+                                "text-indigo-600 border-indigo-200",
+                                "transition-all duration-300"
+                              )}
                             >
                               {isGeneratingImage ? (
                                 <>
@@ -587,118 +651,69 @@ export function CreatePostDialog({
                       </TooltipProvider>
                     </div>
 
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleImageClick}
-                            className="h-8 w-8 p-0"
-                          >
-                            <ImagePlus className="h-4 w-4 text-muted-foreground" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Upload image from device</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <div className="flex items-center gap-2">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0"
+                            >
+                              <Calendar className="h-4 w-4 text-muted-foreground" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Schedule post</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
 
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0"
-                          >
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Schedule post</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0"
-                            onClick={handleCopyContent}
-                          >
-                            <Copy
-                              className={cn(
-                                "h-4 w-4",
-                                copySuccess
-                                  ? "text-green-500"
-                                  : "text-muted-foreground"
-                              )}
-                            />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{copySuccess ? "Copied!" : "Copy content"}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0"
+                              onClick={handleCopyContent}
+                            >
+                              <Copy
+                                className={cn(
+                                  "h-4 w-4",
+                                  copySuccess
+                                    ? "text-green-500"
+                                    : "text-muted-foreground"
+                                )}
+                              />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{copySuccess ? "Copied!" : "Copy content"}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
                   </div>
+
+                  {/* Display topics */}
+                  {postTopics.length > 0 && (
+                    <div className="mt-4 space-y-2">
+                      <h3 className="text-sm font-medium"># HashTags</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {postTopics.map((topic, index) => (
+                          <Badge
+                            key={index}
+                            variant="secondary"
+                            className="text-sm py-1 px-3"
+                          >
+                            {topic}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-
-                {/* Uploaded Images Preview */}
-                {uploadedImages.length > 0 && (
-                  <div className="mb-4">
-                    <div className="grid grid-cols-4 gap-4">
-                      {uploadedImages.map((image, index) => (
-                        <div
-                          key={index}
-                          className="relative group aspect-square"
-                        >
-                          <img
-                            src={image}
-                            alt={`Uploaded ${index + 1}`}
-                            className="w-full h-full object-cover rounded-md"
-                          />
-                          <button
-                            onClick={() => removeImage(index)}
-                            className="absolute -top-2 -right-2 p-1.5 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
-                          >
-                            <X className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <Textarea
-                  placeholder="Write your post content..."
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  className="min-h-[200px] resize-none whitespace-pre-wrap font-[inherit]"
-                />
-
-                {/* Display topics */}
-                {postTopics.length > 0 && (
-                  <div className="mt-4 space-y-2">
-                    <h3 className="text-sm font-medium"># HashTags</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {postTopics.map((topic, index) => (
-                        <Badge
-                          key={index}
-                          variant="secondary"
-                          className="text-sm py-1 px-3"
-                        >
-                          {topic}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
 
@@ -757,7 +772,7 @@ export function CreatePostDialog({
                                   content.split("\n").length > 2 && (
                                     <button
                                       onClick={() => setIsExpanded(true)}
-                                      className="text-primary hover:text-primary/90 inline-block ml-1"
+                                      className="text-primary hover:text-orange-5r/90 inline-block ml-1"
                                     >
                                       ...more
                                     </button>
