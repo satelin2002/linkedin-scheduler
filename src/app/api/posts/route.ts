@@ -1,20 +1,21 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth"; // Importing the auth function from your auth configuration
-import { prisma } from "@/lib/prisma"; // Fixed default import to named import
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { linkedin } from "@/lib/linkedin";
-import { uploadImage } from "@/lib/upload"; // Image upload utility
+import { uploadImage } from "@/lib/upload";
 
-export async function POST(req: Request) {
+export const POST = auth(async function POST(req) {
   try {
-    const session = await auth(); // Get the session using Auth.js
-    if (!session?.user) {
-      return new NextResponse("Unauthorized", { status: 401 });
+    if (!req.auth) {
+      return NextResponse.json(
+        { error: "Please sign in to continue" },
+        { status: 401 }
+      );
     }
 
-    if (!session?.user?.id) {
-      return new NextResponse("Unauthorized - Invalid user ID", {
-        status: 401,
-      });
+    const userId = req.auth.user?.id;
+    if (!userId) {
+      return NextResponse.json({ error: "Invalid session" }, { status: 401 });
     }
 
     const body = await req.json();
@@ -30,11 +31,11 @@ export async function POST(req: Request) {
     // 1. Create local post first
     const post = await prisma.post.create({
       data: {
-        content: content,
-        visibility: visibility,
-        status: status,
-        scheduledFor: scheduledFor,
-        authorId: session.user.id, // Use the user ID from the session
+        content,
+        visibility,
+        status,
+        scheduledFor,
+        authorId: userId,
         organizationId,
       },
     });
@@ -77,7 +78,7 @@ export async function POST(req: Request) {
       const linkedinPost = await linkedin.createPost({
         author: organizationId
           ? `urn:li:organization:${organizationId}`
-          : `urn:li:person:${session.user.id}`,
+          : `urn:li:person:${userId}`,
         commentary: content,
         visibility,
         media: uploadedMedia
@@ -124,4 +125,4 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
-}
+});

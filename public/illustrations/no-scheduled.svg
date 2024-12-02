@@ -22,4 +22,4 @@
   <!-- Curvy line reaching to calendar -->
   <path d="M 80,80 Q 120,180 150,200" fill="none" stroke="#ffa726" stroke-width="6"/>
   <circle cx="80" cy="80" r="8" fill="#ff9800"/>
-</svg>
+</svg> 

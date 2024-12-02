@@ -7,7 +7,13 @@ interface EmptyStateProps {
   title: string;
   description?: string;
   className?: string;
-  image: "not-found" | "error";
+  image:
+    | "no-scheduled"
+    | "no-published"
+    | "no-drafts"
+    | "no-all-posts"
+    | "error"
+    | "not-found";
   showCreatePost?: boolean;
   showLearnMore?: boolean;
   onCreatePost?: () => void;

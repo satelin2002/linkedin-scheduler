@@ -125,7 +125,13 @@ export function Page() {
     queryKey: ["posts", activeTab, currentPage, searchQuery],
     queryFn: async () => {
       const params = new URLSearchParams({
-        status: activeTab === "all" ? "" : activeTab,
+        status:
+          activeTab === "all"
+            ? ""
+            : activeTab === "drafts"
+            ? "draft"
+            : activeTab,
+
         page: currentPage.toString(),
         limit: postsPerPage.toString(),
         ...(searchQuery && { search: searchQuery }),
@@ -203,7 +209,7 @@ export function Page() {
                       Published
                     </TabsTrigger>
                     <TabsTrigger
-                      value="drafts"
+                      value="draft"
                       className="px-6 rounded-md data-[state=active]:bg-secondary/80 data-[state=active]:border-primary/70 data-[state=active]:font-semibold data-[state=active]:border data-[state=active]:text-primary"
                     >
                       <FolderPen className="h-4 w-4 mr-2" />
@@ -259,7 +265,17 @@ export function Page() {
                 />
               ) : data?.posts.length === 0 ? (
                 <EmptyState
-                  image="not-found"
+                  image={
+                    activeTab === "scheduled"
+                      ? "no-scheduled"
+                      : activeTab === "published"
+                      ? "no-published"
+                      : activeTab === "draft"
+                      ? "no-drafts"
+                      : activeTab === "all"
+                      ? "no-all-posts"
+                      : "not-found"
+                  }
                   title={
                     activeTab === "all"
                       ? "No posts found"

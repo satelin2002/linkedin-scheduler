@@ -23,16 +23,20 @@ export const authConfig = {
     },
   },
   callbacks: {
-    // authorized({ auth, request: { nextUrl } }) {
-    //   // const isLoggedIn = !!auth?.user;
-    //   // const isOnDashboard = nextUrl.pathname.startsWith("/posts");
-    //   // if (isOnDashboard) {
-    //   //   if (isLoggedIn) return true;
-    //   //   return false; // Redirect unauthenticated users to login page
-    //   // } else if (isLoggedIn) {
-    //   //   return Response.redirect(new URL("/posts", nextUrl));
-    //   // }
-    //   // return true;
-    // },
+    session: async ({ session, token }) => {
+      if (session?.user && token?.sub) {
+        session.user.id = token.sub;
+      }
+      return session;
+    },
+    jwt: async ({ token, user }) => {
+      if (user) {
+        token.sub = user.id;
+      }
+      return token;
+    },
+  },
+  session: {
+    strategy: "jwt",
   },
 } satisfies NextAuthConfig;
