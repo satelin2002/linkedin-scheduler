@@ -9,8 +9,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db" // Path to your SQLite file
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -26,6 +26,8 @@ model User {
  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  Post Post[]
 }
  
 model Account {
@@ -81,4 +83,156 @@ model Authenticator {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
  
   @@id([userId, credentialID])
+}
+
+model Post {
+  id            String      @id @default(cuid())
+  // Basic post content
+  content       String      @db.Text
+  commentary    String?     @db.Text     // For shared posts commentary
+  visibility    Visibility  @default(anyone) // LinkedIn visibility options
+  status        PostStatus  @default(draft)
+  topics        String[]    @default([])  // Array of topics/tags for the post
+  
+  // LinkedIn specific fields
+  linkedinPostId String?    @unique      // ID returned from LinkedIn API
+  linkedinPostUrl String?   // URL of the post on LinkedIn
+  shareMediaCategory MediaCategory? // NONE, ARTICLE, IMAGE, VIDEO, etc.
+
+  // Media handling
+  images        PostMedia[]
+  video         PostMedia?  @relation("VideoContent", fields: [videoId], references: [id])
+  videoId       String?     @unique
+  
+  // Author & Organization
+  authorId      String                    // Your platform's user ID
+  author        User        @relation(fields: [authorId], references: [id])
+  linkedinUserId String?                  // LinkedIn API user identifier
+  organizationId String?                  // LinkedIn organization/page ID
+  organizationActor Actor?  @relation(fields: [organizationId], references: [id])
+  
+  // Timestamps
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  scheduledFor  DateTime?   // For scheduling posts
+  publishedAt   DateTime?   // When the post was published to LinkedIn
+  
+  // Engagement metrics from LinkedIn
+  numLikes      Int         @default(0)
+  numComments   Int         @default(0)
+  numShares     Int         @default(0)
+  numImpressions Int        @default(0)
+  numClicks     Int         @default(0)
+  
+  // Post metadata
+  distributionMetrics DistributionMetrics?
+  
+  @@index([authorId])
+  @@index([status])
+  @@index([scheduledFor])
+}
+
+model PostMedia {
+  id          String    @id @default(cuid())
+  postId      String
+  post        Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  // Media details
+  mediaType   MediaType @default(IMAGE)
+  title       String?   // Title/caption for the media
+  description String?   // Description for the media
+  altText     String?   // Alternative text for accessibility
+  
+  // Asset details
+  assetId     String?   // LinkedIn media asset ID
+  url         String    // Original upload URL
+  thumbnailUrl String?  // Thumbnail URL (for videos)
+  
+  // Media specific metadata
+  duration    Int?      // Video duration in seconds
+  size        Int?      // File size in bytes
+  width       Int?      // Media width
+  height      Int?      // Media height
+  
+  // Upload status
+  uploadStatus UploadStatus @default(pending)
+  
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Video specific relation
+  videoPost   Post?     @relation("VideoContent")
+
+  @@index([postId])
+}
+
+model Actor {
+  id            String    @id
+  name          String
+  type          ActorType // PERSON or ORGANIZATION
+  vanityName    String?   // LinkedIn vanity name
+  profileUrl    String?   // LinkedIn profile URL
+  posts         Post[]
+}
+
+model DistributionMetrics {
+  id            String    @id @default(cuid())
+  postId        String    @unique
+  post          Post      @relation(fields: [postId], references: [id])
+  
+  // LinkedIn distribution metrics
+  uniqueImpressionsCount Int @default(0)
+  shareCount            Int @default(0)
+  likeCount            Int @default(0)
+  commentCount         Int @default(0)
+  engagementRate       Float @default(0)
+  clickCount          Int @default(0)
+  
+  updatedAt           DateTime @updatedAt
+}
+
+enum PostStatus {
+  draft
+  scheduled
+  published
+  failed
+  archived
+}
+
+enum Visibility {
+  anyone           // Public
+  connections      // 1st-degree connections
+  logged_in        // All LinkedIn members
+  organization     // Organization only
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  ARTICLE
+  DOCUMENT
+  POLL
+}
+
+enum UploadStatus {
+  pending
+  uploading
+  processing
+  ready
+  failed
+}
+
+enum ActorType {
+  PERSON
+  ORGANIZATION
+}
+
+enum MediaCategory {
+  NONE
+  ARTICLE
+  IMAGE
+  VIDEO
+  DOCUMENT
+  POLL
 }

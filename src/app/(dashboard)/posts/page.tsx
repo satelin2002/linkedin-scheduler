@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -60,13 +60,28 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CreatePostDialog } from "@/components/create-post-dialog";
+import { useQuery } from "@tanstack/react-query";
+import { Post, PostStatus } from "@prisma/client";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
+
+type PaginatedResponse = {
+  posts: Post[];
+  pagination: {
+    total: number;
+    pages: number;
+    page: number;
+    limit: number;
+  };
+};
 
 export function Page() {
   const router = useRouter();
   const [expandedPosts, setExpandedPosts] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState("my-posts");
+  const [activeTab, setActiveTab] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 10;
+  const [searchQuery, setSearchQuery] = useState("");
 
   const togglePostExpansion = (postId: string) => {
     setExpandedPosts((prev) =>
@@ -105,6 +120,32 @@ export function Page() {
       `/posts/create?content=${encodedContent}&topics=${encodedTopics}`
     );
   };
+
+  const { data, isLoading, error, refetch } = useQuery<PaginatedResponse>({
+    queryKey: ["posts", activeTab, currentPage, searchQuery],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        status: activeTab === "all" ? "" : activeTab,
+        page: currentPage.toString(),
+        limit: postsPerPage.toString(),
+        ...(searchQuery && { search: searchQuery }),
+      });
+
+      const response = await fetch(`/api/posts/get?${params}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch posts");
+      }
+      return response.json();
+    },
+  });
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      refetch();
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, refetch]);
 
   return (
     <SidebarProvider>
@@ -185,265 +226,328 @@ export function Page() {
                     </TooltipProvider>
                     <Input
                       type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search posts..."
                       className="pl-9 h-9 w-full bg-white"
                     />
                   </div>
-                  <CreatePostDialog />
+                  <CreatePostDialog data-create-post />
                 </div>
               </div>
 
-              <div className="ml-1 mt-4 text-sm text-muted-foreground">
-                {activeTab === "all" && (
-                  <p>Viewing all posts in your dashboard.</p>
-                )}
-                {activeTab === "scheduled" && (
-                  <p>These are your scheduled posts.</p>
-                )}
-                {activeTab === "published" && (
-                  <p>Here are your published posts.</p>
-                )}
-                {activeTab === "drafts" && <p>These are your draft posts.</p>}
-              </div>
-
-              <div className="grid gap-4 mt-4 w-full max-w-full">
-                {paginatedPosts.map((post, index) => (
-                  <div
-                    key={post.id}
-                    className={cn(
-                      "rounded-lg border bg-card text-card-foreground shadow-sm h-fit",
-                      "transform transition-all duration-300",
-                      "animate-in fade-in-50 slide-in-from-bottom-3",
-                      `delay-[${index * 50}ms]`
-                    )}
-                  >
-                    <div className="p-3 sm:p-4">
-                      <div className="prose prose-sm max-w-none w-full">
-                        <div className="flex flex-col sm:flex-row sm:items-start gap-3">
-                          <div className="flex-shrink-0 self-start sm:self-center">
-                            {post.status === "scheduled" && (
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    {/* <div className="rounded-full border p-2.5 bg-gradient-to-br from-gray-50   to-gray-100/20">
-                                      <CalendarClock className="h-5 w-5  " />
-                                    </div> */}
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>Scheduled post</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            )}
-                            {post.status === "published" && (
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    {/* <div className="rounded-full border p-2.5 bg-gradient-to-br from-gray-50   to-gray-100/20">
-                                      <MailCheck className="h-5 w-5 " />
-                                    </div> */}
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>Published post</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            )}
-                            {post.status === "draft" && (
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    {/* <div className="rounded-full border p-2.5 bg-gradient-to-br from-gray-50   to-gray-100/20">
-                                      <FilePen className="h-5 w-5  " />
-                                    </div> */}
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>Draft post</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            )}
-                          </div>
-
-                          <div className="flex-1 min-w-0 overflow-hidden space-y-3">
-                            <div className="text-sm text-foreground overflow-hidden">
-                              <p className="truncate pr-4 pb-1 text-black">
-                                {post.content.split(" ").slice(0, 15).join(" ")}
-                                {post.content.split(" ").length > 15
-                                  ? "..."
-                                  : ""}
-                              </p>
-                            </div>
-
-                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
-                              <span className="text-sm text-muted-foreground">
+              {isLoading ? (
+                <div className="grid gap-4 mt-4 w-full max-w-full">
+                  {[...Array(3)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="rounded-lg bg-slate-50/20 text-card-foreground shadow-sm h-20 animate-pulse"
+                    >
+                      <Skeleton className="h-full w-full" />
+                    </div>
+                  ))}
+                </div>
+              ) : error ? (
+                <EmptyState
+                  image="error"
+                  title="Failed to load posts"
+                  description="There was an error loading your posts. Please try refreshing the page."
+                  className="my-8"
+                  onContact={() =>
+                    window.open("mailto:support@example.com", "_blank")
+                  }
+                />
+              ) : data?.posts.length === 0 ? (
+                <EmptyState
+                  image="not-found"
+                  title={
+                    activeTab === "all"
+                      ? "No posts found"
+                      : `No ${activeTab} posts found`
+                  }
+                  description={
+                    searchQuery
+                      ? "We couldn't find any posts matching your search criteria."
+                      : activeTab === "scheduled"
+                      ? "You don't have any scheduled posts. Create a post and schedule it for later."
+                      : activeTab === "published"
+                      ? "You haven't published any posts yet. Start creating and publishing your content."
+                      : activeTab === "drafts"
+                      ? "No drafts found. Save your posts as drafts to continue working on them later."
+                      : "Start creating your first post to share with your network."
+                  }
+                  className="my-8"
+                  showCreatePost={!searchQuery}
+                  showLearnMore={!searchQuery}
+                  onCreatePost={() =>
+                    document
+                      .querySelector<HTMLButtonElement>("[data-create-post]")
+                      ?.click()
+                  }
+                  onLearnMore={() =>
+                    window.open("https://docs.example.com/posts", "_blank")
+                  }
+                />
+              ) : (
+                <>
+                  <div className="grid gap-4 mt-4 w-full max-w-full">
+                    {data?.posts.map((post, index) => (
+                      <div
+                        key={post.id}
+                        className={cn(
+                          "rounded-lg border bg-card text-card-foreground shadow-sm h-fit",
+                          "transform transition-all duration-300",
+                          "animate-in fade-in-50 slide-in-from-bottom-3",
+                          `delay-[${index * 50}ms]`
+                        )}
+                      >
+                        <div className="p-3 sm:p-4">
+                          <div className="prose prose-sm max-w-none w-full">
+                            <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+                              <div className="flex-shrink-0 self-start sm:self-center">
+                                {post.status === "scheduled" && (
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        {/* <div className="rounded-full border p-2.5 bg-gradient-to-br from-gray-50   to-gray-100/20">
+                                          <CalendarClock className="h-5 w-5  " />
+                                        </div> */}
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>Scheduled post</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                )}
                                 {post.status === "published" && (
-                                  <>
-                                    Published on{" "}
-                                    {format(new Date(post.timestamp), "MMM d")}
-                                  </>
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        {/* <div className="rounded-full border p-2.5 bg-gradient-to-br from-gray-50   to-gray-100/20">
+                                          <MailCheck className="h-5 w-5 " />
+                                        </div> */}
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>Published post</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
                                 )}
                                 {post.status === "draft" && (
-                                  <>
-                                    Draft from{" "}
-                                    {format(new Date(post.timestamp), "MMM d")}
-                                  </>
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        {/* <div className="rounded-full border p-2.5 bg-gradient-to-br from-gray-50   to-gray-100/20">
+                                          <FilePen className="h-5 w-5  " />
+                                        </div> */}
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>Draft post</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
                                 )}
-                                {post.status === "scheduled" && (
-                                  <>
-                                    Scheduled for{" "}
-                                    {format(new Date(post.timestamp), "MMM d")}
-                                  </>
-                                )}
-                              </span>
-                              <div className="flex flex-wrap gap-2 min-w-0 overflow-hidden">
-                                {post.topics.map((topic) => (
-                                  <Badge
-                                    key={topic}
-                                    variant="secondary"
-                                    className="rounded-full text-xs"
-                                  >
-                                    {topic}
-                                  </Badge>
-                                ))}
                               </div>
-                            </div>
-                          </div>
 
-                          <div
-                            className="flex items-center gap-2 flex-shrink-0 pt-3 mt-3 border-t 
-                            sm:pt-0 sm:mt-0 sm:border-t-0 sm:border-l sm:pl-4
-                            md:flex-row md:items-center md:gap-2"
-                          >
-                            <div className="flex gap-1">
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="h-8 w-8 p-0 hover:bg-secondary hover:text-primary transition-colors duration-200"
-                                    >
-                                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>Schedule post</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
+                              <div className="flex-1 min-w-0 overflow-hidden space-y-3">
+                                <div className="text-sm text-foreground overflow-hidden">
+                                  <p className="truncate pr-4 pb-1 text-black">
+                                    {post.content
+                                      .split(" ")
+                                      .slice(0, 15)
+                                      .join(" ")}
+                                    {post.content.split(" ").length > 15
+                                      ? "..."
+                                      : ""}
+                                  </p>
+                                </div>
 
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="h-8 w-8 p-0 hover:bg-secondary hover:text-primary transition-colors duration-200"
-                                    >
-                                      <PenSquare className="h-4 w-4 text-muted-foreground" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>Edit post</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+                                  <span className="text-sm text-muted-foreground">
+                                    {post.status === "published" && (
+                                      <>
+                                        Published on{" "}
+                                        {format(
+                                          new Date(post.publishedAt!),
+                                          "MMM d"
+                                        )}
+                                      </>
+                                    )}
+                                    {post.status === "draft" && (
+                                      <>
+                                        Draft from{" "}
+                                        {format(
+                                          new Date(post.createdAt),
+                                          "MMM d"
+                                        )}
+                                      </>
+                                    )}
+                                    {post.status === "scheduled" && (
+                                      <>
+                                        Scheduled for{" "}
+                                        {format(
+                                          new Date(post.scheduledFor!),
+                                          "MMM d"
+                                        )}
+                                      </>
+                                    )}
+                                  </span>
+                                  <div className="flex flex-wrap gap-2 min-w-0 overflow-hidden">
+                                    {post.topics?.map((topic) => (
+                                      <Badge
+                                        key={topic}
+                                        variant="secondary"
+                                        className="rounded-full text-xs"
+                                      >
+                                        {topic}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
 
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="h-8 w-8 p-0 hover:bg-secondary hover:text-primary transition-colors duration-200"
-                                    >
-                                      <Trash2 className="h-4 w-4 text-muted-foreground" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>Delete post</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="h-8 w-8 p-0 hover:bg-secondary hover:text-primary transition-colors duration-200"
-                                    >
-                                      <Send className="h-4 w-4 text-muted-foreground" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>Share post</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
+                              <div
+                                className="flex items-center gap-2 flex-shrink-0 pt-3 mt-3 border-t 
+                                sm:pt-0 sm:mt-0 sm:border-t-0 sm:border-l sm:pl-4
+                                md:flex-row md:items-center md:gap-2"
+                              >
+                                <div className="flex gap-1">
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          className="h-8 w-8 p-0 hover:bg-secondary hover:text-primary transition-colors duration-200"
+                                        >
+                                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>Schedule post</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          className="h-8 w-8 p-0 hover:bg-secondary hover:text-primary transition-colors duration-200"
+                                        >
+                                          <PenSquare className="h-4 w-4 text-muted-foreground" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>Edit post</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          className="h-8 w-8 p-0 hover:bg-secondary hover:text-primary transition-colors duration-200"
+                                        >
+                                          <Trash2 className="h-4 w-4 text-muted-foreground" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>Delete post</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          className="h-8 w-8 p-0 hover:bg-secondary hover:text-primary transition-colors duration-200"
+                                        >
+                                          <Send className="h-4 w-4 text-muted-foreground" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>Share post</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {filteredPosts.length > 0 && (
-                <div className="flex items-center justify-between mt-8 pb-8">
-                  <div className="text-sm text-muted-foreground">
-                    Showing {startIndex + 1} to{" "}
-                    {Math.min(startIndex + postsPerPage, filteredPosts.length)}{" "}
-                    of {filteredPosts.length} posts
+                    ))}
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        setCurrentPage((prev) => Math.max(1, prev - 1))
-                      }
-                      disabled={currentPage === 1}
-                      className="h-8 w-8 p-0"
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
+                  {data?.pagination && data.posts.length > 0 && (
+                    <div className="flex items-center justify-between mt-8 pb-8">
+                      <div className="text-sm text-muted-foreground">
+                        Showing {(data.pagination.page - 1) * postsPerPage + 1}{" "}
+                        to{" "}
+                        {Math.min(
+                          data.pagination.page * postsPerPage,
+                          data.pagination.total
+                        )}{" "}
+                        of {data.pagination.total} posts
+                      </div>
 
-                    <div className="flex items-center gap-1">
-                      {[...Array(totalPages)].map((_, i) => (
+                      <div className="flex items-center gap-2">
                         <Button
-                          key={i + 1}
-                          variant={
-                            currentPage === i + 1 ? "default" : "outline"
-                          }
+                          variant="outline"
                           size="sm"
-                          onClick={() => setCurrentPage(i + 1)}
-                          className={cn(
-                            "h-8 w-8 p-0",
-                            currentPage === i + 1 && "pointer-events-none"
-                          )}
+                          onClick={() =>
+                            setCurrentPage((prev) => Math.max(1, prev - 1))
+                          }
+                          disabled={currentPage === 1}
+                          className="h-8 w-8 p-0"
                         >
-                          {i + 1}
+                          <ChevronLeft className="h-4 w-4" />
                         </Button>
-                      ))}
-                    </div>
 
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-                      }
-                      disabled={currentPage === totalPages}
-                      className="h-8 w-8 p-0"
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
+                        <div className="flex items-center gap-1">
+                          {[...Array(data.pagination.pages)].map((_, i) => (
+                            <Button
+                              key={i + 1}
+                              variant={
+                                currentPage === i + 1 ? "default" : "outline"
+                              }
+                              size="sm"
+                              onClick={() => setCurrentPage(i + 1)}
+                              className={cn(
+                                "h-8 w-8 p-0",
+                                currentPage === i + 1 && "pointer-events-none"
+                              )}
+                            >
+                              {i + 1}
+                            </Button>
+                          ))}
+                        </div>
+
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            setCurrentPage((prev) =>
+                              Math.min(totalPages, prev + 1)
+                            )
+                          }
+                          disabled={currentPage === totalPages}
+                          className="h-8 w-8 p-0"
+                        >
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>

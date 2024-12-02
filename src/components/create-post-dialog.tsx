@@ -53,6 +53,7 @@ import LikeIcon from "./ui/like";
 import HeartIcon from "./ui/hearts";
 import ThumbsUpIcon from "./ui/thumbs-up";
 import { Textarea } from "./ui/textarea";
+import { toast } from "sonner";
 
 export function CreatePostDialog() {
   const [selectedTopic, setSelectedTopic] = useState<string>("");
@@ -153,6 +154,36 @@ export function CreatePostDialog() {
     );
   };
 
+  const handleSaveAsDraft = async () => {
+    try {
+      const response = await fetch("/api/posts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content,
+          status: "draft",
+          images: uploadedImages,
+          visibility: "anyone", // default visibility
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save draft");
+      }
+
+      const savedPost = await response.json();
+      toast.success("Post saved as draft");
+
+      // Close the dialog
+      document.getElementById("close-dialog")?.click();
+    } catch (error) {
+      console.error("Error saving draft:", error);
+      toast.error("Failed to save draft");
+    }
+  };
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -161,7 +192,7 @@ export function CreatePostDialog() {
           Create Post
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-7xl max-h-[76vh] p-0 flex flex-col">
+      <DialogContent className="max-w-6xl max-h-[76vh] p-0 flex flex-col">
         <DialogHeader className="px-6 pt-6">
           <DialogTitle>Create New Post</DialogTitle>
           <DialogDescription>
@@ -465,14 +496,14 @@ export function CreatePostDialog() {
                 <Textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  className="w-full min-h-[280px] p-3 rounded-md border"
+                  className="w-full min-h-[270px] p-3 rounded-md border"
                   placeholder="Write your post content..."
                 />
               </div>
             </div>
 
             {/* Right side - Preview with enhanced styling */}
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 max-w-[45%]">
               <div className="rounded-xl border border-zinc-200 bg-zinc-50/50 shadow-sm p-4">
                 <div className="rounded-sm border bg-card text-card-foreground">
                   <div className="border-b p-2 relative bg-white overflow-x-auto">
@@ -596,7 +627,11 @@ export function CreatePostDialog() {
               Cancel
             </Button>
             <div className="flex gap-2">
-              <Button variant="outline">
+              <Button
+                variant="outline"
+                onClick={handleSaveAsDraft}
+                disabled={!content && uploadedImages.length === 0}
+              >
                 <Save className="h-4 w-4 mr-2" />
                 Save as Draft
               </Button>
