@@ -109,30 +109,57 @@ export function CreatePostDialog({
     }
   }, [post]);
 
-  const handleGenerateIdeas = () => {
+  const handleGenerateIdeas = async () => {
+    if (!selectedTopic) return;
+
     setIsGeneratingIdeas(true);
-    // Simulate API call
-    setTimeout(() => {
-      setGeneratedIdeas([
-        `How to excel in ${selectedTopic}`,
-        `Top 10 trends in ${selectedTopic}`,
-        `The future of ${selectedTopic}`,
-        `Why ${selectedTopic} matters in 2024`,
-        `Essential ${selectedTopic} strategies`,
-      ]);
+    try {
+      const response = await fetch("/api/generate/ideas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic: selectedTopic }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate ideas");
+      }
+
+      const data = await response.json();
+      setGeneratedIdeas(data.ideas);
+    } catch (error) {
+      console.error("Failed to generate ideas:", error);
+      toast.error("Failed to generate ideas");
+    } finally {
       setIsGeneratingIdeas(false);
-    }, 1000);
+    }
   };
 
-  const handleGeneratePost = () => {
+  const handleGeneratePost = async () => {
+    if (!selectedTopic || !selectedIdea) return;
+
     setIsGeneratingPost(true);
-    // Simulate API call
-    setTimeout(() => {
-      setContent(
-        `# ${selectedIdea}\n\nHere's an engaging post about ${selectedIdea} in the context of ${selectedTopic}...\n\n🔑 Key Points:\n- Point 1\n- Point 2\n- Point 3\n\n💡 Pro Tip: Consider these factors when thinking about ${selectedTopic}...`
-      );
+    try {
+      const response = await fetch("/api/generate/post", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          topic: selectedTopic,
+          idea: selectedIdea,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate post");
+      }
+
+      const data = await response.json();
+      setContent(data.content);
+    } catch (error) {
+      console.error("Failed to generate post:", error);
+      toast.error("Failed to generate post");
+    } finally {
       setIsGeneratingPost(false);
-    }, 1500);
+    }
   };
 
   const handleCopyContent = async () => {
@@ -145,15 +172,22 @@ export function CreatePostDialog({
     if (!customContent.trim()) return;
 
     setIsGenerating(true);
-    // Simulate API call for content generation
     try {
-      // Replace with actual API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      setContent(
-        `Based on your input: "${customContent}"\n\n🎯 Key Points:\n• Point 1\n• Point 2\n• Point 3\n\n💡 Insights:\nYour custom content generated insights here...\n\n#CustomContent #Insights`
-      );
+      const response = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic: customContent }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate content");
+      }
+
+      const data = await response.json();
+      setContent(data.content);
     } catch (error) {
       console.error("Failed to generate content:", error);
+      toast.error("Failed to generate content");
     } finally {
       setIsGenerating(false);
     }
@@ -305,7 +339,7 @@ export function CreatePostDialog({
                         value={selectedTopic}
                         onValueChange={setSelectedTopic}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className="w-[415px]">
                           <SelectValue placeholder="Select a topic" />
                         </SelectTrigger>
                         <SelectContent>
@@ -319,7 +353,11 @@ export function CreatePostDialog({
                           </div>
                           {filteredTopics.length > 0 ? (
                             filteredTopics.map((topic) => (
-                              <SelectItem key={topic} value={topic}>
+                              <SelectItem
+                                key={topic}
+                                value={topic}
+                                className="whitespace-normal py-3 min-h-[2.5rem] flex items-start"
+                              >
                                 {topic}
                               </SelectItem>
                             ))
@@ -366,12 +404,16 @@ export function CreatePostDialog({
                           value={selectedIdea}
                           onValueChange={setSelectedIdea}
                         >
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-[415px]">
                             <SelectValue placeholder="Select an idea" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="w-[440px]">
                             {generatedIdeas.map((idea) => (
-                              <SelectItem key={idea} value={idea}>
+                              <SelectItem
+                                key={idea}
+                                value={idea}
+                                className="whitespace-pre-line py-3 cursor-pointer"
+                              >
                                 {idea}
                               </SelectItem>
                             ))}
@@ -411,7 +453,7 @@ export function CreatePostDialog({
                         value={customContent}
                         onChange={(e) => setCustomContent(e.target.value)}
                         className="w-full min-h-[50px] p-3 rounded-md border"
-                        placeholder="Enter your topic or ideas here..."
+                        placeholder="Enter your topic or ideas here...Ex (How Generative AI is Redefining Customer Experience in E-commerce)"
                       />
                     </div>
 
