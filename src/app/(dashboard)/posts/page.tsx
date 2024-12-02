@@ -193,7 +193,20 @@ export function Page() {
                 </div>
               </div>
 
-              <div className="grid gap-4 mt-6 w-full max-w-full">
+              <div className="ml-1 mt-4 text-sm text-muted-foreground">
+                {activeTab === "all" && (
+                  <p>Viewing all posts in your dashboard.</p>
+                )}
+                {activeTab === "scheduled" && (
+                  <p>These are your scheduled posts.</p>
+                )}
+                {activeTab === "published" && (
+                  <p>Here are your published posts.</p>
+                )}
+                {activeTab === "drafts" && <p>These are your draft posts.</p>}
+              </div>
+
+              <div className="grid gap-4 mt-4 w-full max-w-full">
                 {paginatedPosts.map((post, index) => (
                   <div
                     key={post.id}

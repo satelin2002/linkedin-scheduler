@@ -26,6 +26,8 @@ import {
   Loader2,
   Hash,
   FileUser,
+  ImagePlus,
+  X,
 } from "lucide-react";
 import {
   Select,
@@ -44,7 +46,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { mockIdeas, availableTopics } from "@/lib/mock";
 import { cn } from "@/lib/utils";
 import LikeIcon from "./ui/like";
@@ -73,6 +75,7 @@ export function CreatePostDialog() {
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [customContent, setCustomContent] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const previewWidth = {
     desktop: "w-full",
@@ -121,13 +124,33 @@ export function CreatePostDialog() {
       // Replace with actual API call
       await new Promise((resolve) => setTimeout(resolve, 1500));
       setContent(
-        `Based on your input: "${customContent}"\n\n🎯 Key Points:\n• Point 1\n�� Point 2\n• Point 3\n\n💡 Insights:\nYour custom content generated insights here...\n\n#CustomContent #Insights`
+        `Based on your input: "${customContent}"\n\n🎯 Key Points:\n• Point 1\n• Point 2\n• Point 3\n\n💡 Insights:\nYour custom content generated insights here...\n\n#CustomContent #Insights`
       );
     } catch (error) {
       console.error("Failed to generate content:", error);
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const newImages = Array.from(files).map((file) =>
+        URL.createObjectURL(file)
+      );
+      setUploadedImages((prev) => [...prev, ...newImages]);
+    }
+  };
+
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const removeImage = (indexToRemove: number) => {
+    setUploadedImages((prev) =>
+      prev.filter((_, index) => index !== indexToRemove)
+    );
   };
 
   return (
@@ -168,6 +191,16 @@ export function CreatePostDialog() {
                     Custom Topics
                   </TabsTrigger>
                 </TabsList>
+
+                {/* Description based on active tab */}
+                <div className="mt-4 text-sm text-muted-foreground">
+                  <TabsContent value="default">
+                    <p>Select a topic to generate ideas for your post.</p>
+                  </TabsContent>
+                  <TabsContent value="custom">
+                    <p>Create a custom topic to tailor your post content.</p>
+                  </TabsContent>
+                </div>
 
                 <TabsContent value="default" className="space-y-6 pt-2">
                   {/* Step 1: Topic Selection */}
@@ -314,6 +347,34 @@ export function CreatePostDialog() {
                   </p>
 
                   <div className="flex items-center gap-2">
+                    {/* Hidden file input */}
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleImageUpload}
+                      accept="image/*"
+                      className="hidden"
+                      multiple
+                    />
+
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            onClick={handleImageClick}
+                          >
+                            <ImagePlus className="h-4 w-4 text-muted-foreground" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Upload image</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -375,10 +436,36 @@ export function CreatePostDialog() {
                   </div>
                 </div>
 
+                {/* Uploaded Images Preview */}
+                {uploadedImages.length > 0 && (
+                  <div className="mb-4">
+                    <div className="grid grid-cols-4 gap-4">
+                      {uploadedImages.map((image, index) => (
+                        <div
+                          key={index}
+                          className="relative group aspect-square"
+                        >
+                          <img
+                            src={image}
+                            alt={`Uploaded ${index + 1}`}
+                            className="w-full h-full object-cover rounded-md"
+                          />
+                          <button
+                            onClick={() => removeImage(index)}
+                            className="absolute -top-2 -right-2 p-1.5 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <Textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  className="w-full min-h-[300px] p-3 rounded-md border"
+                  className="w-full min-h-[280px] p-3 rounded-md border"
                   placeholder="Write your post content..."
                 />
               </div>
@@ -399,7 +486,7 @@ export function CreatePostDialog() {
                     </div>
                   </div>
 
-                  <div className="overflow-x-auto p-4 bg-slate-50 h-[455px] overflow-y-auto">
+                  <div className="overflow-x-auto p-4 bg-slate-50 h-[550px] overflow-y-auto">
                     <div className="w-[380px] mx-auto bg-background transition-all duration-200">
                       <div className="rounded-lg border bg-card shadow-sm">
                         {/* Post Header */}
@@ -428,13 +515,13 @@ export function CreatePostDialog() {
                         </div>
 
                         {/* Post Content with Image */}
-                        <div className="p-4 prose prose-sm max-w-none text-sm">
-                          {content ? (
-                            <div className="space-y-4">
-                              <div className="whitespace-pre-wrap">
+                        <div className="prose prose-sm max-w-none text-sm pb-4">
+                          {content || uploadedImages.length > 0 ? (
+                            <div className="space-y-2">
+                              <div className="whitespace-pre-wrap px-4 pt-4">
                                 {isExpanded
                                   ? content
-                                  : content.split("\n").slice(0, 2).join("\n")}
+                                  : content.split("\n").slice(0, 3).join("\n")}
                                 {!isExpanded &&
                                   content.split("\n").length > 2 && (
                                     <button
@@ -448,13 +535,11 @@ export function CreatePostDialog() {
                               {uploadedImages.length > 0 && (
                                 <div className="mt-4 grid gap-2">
                                   {uploadedImages.map((image, index) => (
-                                    <Image
+                                    <img
                                       key={index}
                                       src={image}
                                       alt={`Post image ${index + 1}`}
-                                      width={500}
-                                      height={300}
-                                      className="rounded-lg object-cover w-full"
+                                      className="object-cover w-full"
                                     />
                                   ))}
                                 </div>
