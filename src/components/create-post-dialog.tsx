@@ -237,6 +237,8 @@ export function CreatePostDialog({
         : "/api/posts";
       const method = currentDraftId ? "PUT" : "POST";
 
+      console.log("Saving draft with topics:", postTopics);
+
       const response = await fetch(endpoint, {
         method,
         headers: { "Content-Type": "application/json" },

@@ -22,7 +22,7 @@ export const PUT = auth(async function PUT(req, { params }) {
     }
 
     const body = await req.json();
-    const { content, visibility, images } = body;
+    const { content, visibility, images, topics } = body;
 
     const existingPost = await prisma.post.findFirst({
       where: {
@@ -42,6 +42,7 @@ export const PUT = auth(async function PUT(req, { params }) {
       data: {
         content,
         visibility,
+        topics: topics || [],
         // Add other fields as needed
       },
     });

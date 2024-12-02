@@ -26,6 +26,7 @@ export const POST = auth(async function POST(req) {
       scheduledFor,
       images,
       organizationId,
+      topics,
     } = body;
 
     // 1. Create local post first
@@ -37,6 +38,7 @@ export const POST = auth(async function POST(req) {
         scheduledFor,
         authorId: userId,
         organizationId,
+        topics: topics || [],
       },
     });
 
