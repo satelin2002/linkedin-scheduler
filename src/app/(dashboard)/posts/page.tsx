@@ -83,6 +83,8 @@ export function Page() {
   const postsPerPage = 10;
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [editingPost, setEditingPost] = useState<Post | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const togglePostExpansion = (postId: string) => {
     setExpandedPosts((prev) =>
@@ -236,7 +238,16 @@ export function Page() {
                       className="pl-9 h-9 w-full bg-white"
                     />
                   </div>
-                  <CreatePostDialog data-create-post />
+                  <CreatePostDialog
+                    data-create-post
+                    post={editingPost}
+                    open={isDialogOpen}
+                    onOpenChange={setIsDialogOpen}
+                    onClose={() => {
+                      setEditingPost(null);
+                      setIsDialogOpen(false);
+                    }}
+                  />
                 </div>
               </div>
 
@@ -450,6 +461,10 @@ export function Page() {
                                           variant="ghost"
                                           size="sm"
                                           className="h-8 w-8 p-0 hover:bg-secondary hover:text-primary transition-colors duration-200"
+                                          onClick={() => {
+                                            setEditingPost(post);
+                                            setIsDialogOpen(true);
+                                          }}
                                         >
                                           <PenSquare className="h-4 w-4 text-muted-foreground" />
                                         </Button>
@@ -460,22 +475,24 @@ export function Page() {
                                     </Tooltip>
                                   </TooltipProvider>
 
-                                  <TooltipProvider>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          className="h-8 w-8 p-0 hover:bg-secondary hover:text-primary transition-colors duration-200"
-                                        >
-                                          <Trash2 className="h-4 w-4 text-muted-foreground" />
-                                        </Button>
-                                      </TooltipTrigger>
-                                      <TooltipContent>
-                                        <p>Delete post</p>
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  </TooltipProvider>
+                                  {post.status !== "published" && (
+                                    <TooltipProvider>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-8 w-8 p-0 hover:bg-secondary hover:text-primary transition-colors duration-200"
+                                          >
+                                            <Trash2 className="h-4 w-4 text-muted-foreground" />
+                                          </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                          <p>Delete post</p>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
+                                  )}
                                   <TooltipProvider>
                                     <Tooltip>
                                       <TooltipTrigger asChild>

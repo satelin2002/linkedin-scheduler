@@ -46,7 +46,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { mockIdeas, availableTopics } from "@/lib/mock";
 import { cn } from "@/lib/utils";
 import LikeIcon from "./ui/like";
@@ -54,12 +54,25 @@ import HeartIcon from "./ui/hearts";
 import ThumbsUpIcon from "./ui/thumbs-up";
 import { Textarea } from "./ui/textarea";
 import { toast } from "sonner";
+import { Post } from "@prisma/client";
 
-export function CreatePostDialog() {
+interface CreatePostDialogProps {
+  post?: Post | null;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onClose?: () => void;
+}
+
+export function CreatePostDialog({
+  post,
+  open,
+  onOpenChange,
+  onClose,
+}: CreatePostDialogProps) {
   const [selectedTopic, setSelectedTopic] = useState<string>("");
   const [generatedIdeas, setGeneratedIdeas] = useState<string[]>([]);
   const [selectedIdea, setSelectedIdea] = useState<string>("");
-  const [content, setContent] = useState<string>("");
+  const [content, setContent] = useState(post?.content || "");
   const [isGeneratingIdeas, setIsGeneratingIdeas] = useState(false);
   const [isGeneratingPost, setIsGeneratingPost] = useState(false);
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
@@ -77,12 +90,23 @@ export function CreatePostDialog() {
   const [customContent, setCustomContent] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showSaved, setShowSaved] = useState(false);
+  const [currentDraftId, setCurrentDraftId] = useState<string | null>(
+    post?.id || null
+  );
 
   const previewWidth = {
     desktop: "w-full",
     tablet: "w-[768px]",
     mobile: "w-[380px]",
   };
+
+  useEffect(() => {
+    if (post) {
+      setContent(post.content);
+      setCurrentDraftId(post.id);
+    }
+  }, [post]);
 
   const handleGenerateIdeas = () => {
     setIsGeneratingIdeas(true);
@@ -156,8 +180,14 @@ export function CreatePostDialog() {
 
   const handleSaveAsDraft = async () => {
     try {
-      const response = await fetch("/api/posts", {
-        method: "POST",
+      const endpoint = currentDraftId
+        ? `/api/posts/${currentDraftId}`
+        : "/api/posts";
+
+      const method = currentDraftId ? "PUT" : "POST";
+
+      const response = await fetch(endpoint, {
+        method,
         headers: {
           "Content-Type": "application/json",
         },
@@ -165,7 +195,7 @@ export function CreatePostDialog() {
           content,
           status: "draft",
           images: uploadedImages,
-          visibility: "anyone", // default visibility
+          visibility: "anyone",
         }),
       });
 
@@ -174,29 +204,50 @@ export function CreatePostDialog() {
       }
 
       const savedPost = await response.json();
-      toast.success("Post saved as draft");
+      setCurrentDraftId(savedPost.id);
 
-      // Close the dialog
-      document.getElementById("close-dialog")?.click();
+      toast.success("Post saved as draft");
+      setShowSaved(true);
+      setTimeout(() => setShowSaved(false), 5000);
     } catch (error) {
       console.error("Error saving draft:", error);
       toast.error("Failed to save draft");
     }
   };
 
+  const handleOpenDialog = () => {
+    if (post) {
+      setContent(post.content);
+      setCurrentDraftId(post.id);
+      // Set other fields from post
+    } else {
+      setContent("");
+      setCurrentDraftId(null);
+      // Reset other fields
+    }
+  };
+
+  const handleCloseDialog = () => {
+    onClose?.();
+    setContent("");
+    setCurrentDraftId(null);
+  };
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button>
+        <Button onClick={handleOpenDialog}>
           <Plus className="h-4 w-4 mr-2" />
           Create Post
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-6xl max-h-[76vh] p-0 flex flex-col">
         <DialogHeader className="px-6 pt-6">
-          <DialogTitle>Create New Post</DialogTitle>
+          <DialogTitle>{post ? "Edit Post" : "Create New Post"}</DialogTitle>
           <DialogDescription>
-            Create and share your post with your network.
+            {post
+              ? "Edit and update your post."
+              : "Create and share your post with your network."}
           </DialogDescription>
         </DialogHeader>
 
@@ -494,10 +545,10 @@ export function CreatePostDialog() {
                 )}
 
                 <Textarea
+                  placeholder="Write your post content..."
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  className="w-full min-h-[270px] p-3 rounded-md border"
-                  placeholder="Write your post content..."
+                  className="min-h-[200px] resize-none"
                 />
               </div>
             </div>
@@ -626,19 +677,26 @@ export function CreatePostDialog() {
             >
               Cancel
             </Button>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={handleSaveAsDraft}
-                disabled={!content && uploadedImages.length === 0}
-              >
-                <Save className="h-4 w-4 mr-2" />
-                Save as Draft
-              </Button>
-              <Button>
-                <Send className="h-4 w-4 mr-2" />
-                Publish Post
-              </Button>
+            <div className="flex items-center gap-4">
+              {showSaved && (
+                <span className="text-sm text-green-500 animate-in fade-in slide-in-from-right-3">
+                  Saved
+                </span>
+              )}
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={handleSaveAsDraft}
+                  disabled={!content && uploadedImages.length === 0}
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  Save as Draft
+                </Button>
+                <Button>
+                  <Send className="h-4 w-4 mr-2" />
+                  Publish Post
+                </Button>
+              </div>
             </div>
           </div>
         </div>
