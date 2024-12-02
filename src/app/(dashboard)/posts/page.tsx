@@ -32,6 +32,9 @@ import {
   ChevronLeft,
   ChevronRight,
   FilePen,
+  GalleryVerticalEnd,
+  FolderClock,
+  FolderPen,
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -140,24 +143,28 @@ export function Page() {
                       value="all"
                       className="px-6 rounded-md data-[state=active]:bg-secondary/80 data-[state=active]:border-primary/70 data-[state=active]:border data-[state=active]:text-primary"
                     >
+                      <GalleryVerticalEnd className="h-4 w-4 mr-2" />
                       All Posts
                     </TabsTrigger>
                     <TabsTrigger
                       value="scheduled"
                       className="px-6 rounded-md data-[state=active]:bg-secondary/80 data-[state=active]:border-primary/70 data-[state=active]:border data-[state=active]:text-primary"
                     >
+                      <FolderClock className="h-4 w-4 mr-2" />
                       Scheduled
                     </TabsTrigger>
                     <TabsTrigger
                       value="published"
                       className="px-6 rounded-md data-[state=active]:bg-secondary/80 data-[state=active]:border-primary/70 data-[state=active]:border data-[state=active]:text-primary"
                     >
+                      <BookCheck className="h-4 w-4 mr-2" />
                       Published
                     </TabsTrigger>
                     <TabsTrigger
                       value="drafts"
                       className="px-6 rounded-md data-[state=active]:bg-secondary/80 data-[state=active]:border-primary/70 data-[state=active]:border data-[state=active]:text-primary"
                     >
+                      <FolderPen className="h-4 w-4 mr-2" />
                       Drafts
                     </TabsTrigger>
                   </TabsList>
@@ -187,7 +194,7 @@ export function Page() {
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button size="default">
-                            <Plus className="h-4 w-4 mr-2" />
+                            <Plus className="h-4 w-4 mr-2 " />
                             Create Post
                           </Button>
                         </TooltipTrigger>
@@ -214,9 +221,9 @@ export function Page() {
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <div className="rounded-full border p-2.5 bg-gradient-to-br from-gray-50   to-gray-100/20">
+                                    {/* <div className="rounded-full border p-2.5 bg-gradient-to-br from-gray-50   to-gray-100/20">
                                       <CalendarClock className="h-5 w-5  " />
-                                    </div>
+                                    </div> */}
                                   </TooltipTrigger>
                                   <TooltipContent>
                                     <p>Scheduled post</p>
@@ -228,9 +235,9 @@ export function Page() {
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <div className="rounded-full border p-2.5 bg-gradient-to-br from-gray-50   to-gray-100/20">
+                                    {/* <div className="rounded-full border p-2.5 bg-gradient-to-br from-gray-50   to-gray-100/20">
                                       <MailCheck className="h-5 w-5 " />
-                                    </div>
+                                    </div> */}
                                   </TooltipTrigger>
                                   <TooltipContent>
                                     <p>Published post</p>
@@ -242,9 +249,9 @@ export function Page() {
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <div className="rounded-full border p-2.5 bg-gradient-to-br from-gray-50   to-gray-100/20">
+                                    {/* <div className="rounded-full border p-2.5 bg-gradient-to-br from-gray-50   to-gray-100/20">
                                       <FilePen className="h-5 w-5  " />
-                                    </div>
+                                    </div> */}
                                   </TooltipTrigger>
                                   <TooltipContent>
                                     <p>Draft post</p>
@@ -309,7 +316,7 @@ export function Page() {
                                       size="sm"
                                       className="h-8 w-8 p-0 hover:bg-secondary/20"
                                     >
-                                      <Calendar className="h-4 w-4" />
+                                      <Calendar className="h-4 w-4 text-muted-foreground" />
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent>
@@ -326,7 +333,7 @@ export function Page() {
                                       size="sm"
                                       className="h-8 w-8 p-0 hover:bg-secondary/20"
                                     >
-                                      <Clock className="h-4 w-4" />
+                                      <Clock className="h-4 w-4 text-muted-foreground" />
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent>
@@ -343,7 +350,7 @@ export function Page() {
                                       size="sm"
                                       className="h-8 w-8 p-0 hover:bg-secondary/20"
                                     >
-                                      <Trash2 className="h-4 w-4" />
+                                      <Trash2 className="h-4 w-4 text-muted-foreground" />
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent>
