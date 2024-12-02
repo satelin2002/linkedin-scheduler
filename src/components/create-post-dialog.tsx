@@ -94,6 +94,7 @@ export function CreatePostDialog({
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(
     post?.id || null
   );
+  const [topicSearch, setTopicSearch] = useState("");
 
   const previewWidth = {
     desktop: "w-full",
@@ -233,6 +234,10 @@ export function CreatePostDialog({
     setCurrentDraftId(null);
   };
 
+  const filteredTopics = availableTopics.filter((topic) =>
+    topic.toLowerCase().includes(topicSearch.toLowerCase())
+  );
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
@@ -300,15 +305,29 @@ export function CreatePostDialog({
                         value={selectedTopic}
                         onValueChange={setSelectedTopic}
                       >
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger>
                           <SelectValue placeholder="Select a topic" />
                         </SelectTrigger>
                         <SelectContent>
-                          {availableTopics.map((topic) => (
-                            <SelectItem key={topic} value={topic}>
-                              {topic}
-                            </SelectItem>
-                          ))}
+                          <div className="p-2">
+                            <Input
+                              placeholder="Search topics..."
+                              value={topicSearch}
+                              onChange={(e) => setTopicSearch(e.target.value)}
+                              className="mb-2"
+                            />
+                          </div>
+                          {filteredTopics.length > 0 ? (
+                            filteredTopics.map((topic) => (
+                              <SelectItem key={topic} value={topic}>
+                                {topic}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <div className="py-6 text-center text-sm text-muted-foreground">
+                              No topics found
+                            </div>
+                          )}
                         </SelectContent>
                       </Select>
                       <Button
@@ -673,7 +692,10 @@ export function CreatePostDialog({
           <div className="p-6 flex justify-between items-center">
             <Button
               variant="outline"
-              onClick={() => document.getElementById("close-dialog")?.click()}
+              onClick={() => {
+                onOpenChange?.(false); // Close the dialog
+                handleCloseDialog(); // Clean up state
+              }}
             >
               Cancel
             </Button>
