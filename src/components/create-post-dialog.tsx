@@ -135,7 +135,10 @@ export function CreatePostDialog({
   };
 
   const handleGeneratePost = async () => {
-    if (!selectedTopic || !selectedIdea) return;
+    if (!selectedTopic || !selectedIdea) {
+      toast.error("Please select both a topic and an idea");
+      return;
+    }
 
     setIsGeneratingPost(true);
     try {
@@ -148,15 +151,27 @@ export function CreatePostDialog({
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to generate post");
+        throw new Error(
+          data.details || data.error || "Failed to generate post"
+        );
       }
 
-      const data = await response.json();
       setContent(data.content);
-    } catch (error) {
+      toast.success("Post content generated successfully!");
+    } catch (error: any) {
       console.error("Failed to generate post:", error);
-      toast.error("Failed to generate post");
+      toast.error(error.message || "Failed to generate post content");
+
+      // Reset states if needed
+      if (error.message?.includes("AI generation failed")) {
+        // Handle AI-specific errors
+        toast.error(
+          "AI service is temporarily unavailable. Please try again later."
+        );
+      }
     } finally {
       setIsGeneratingPost(false);
     }
@@ -427,7 +442,9 @@ export function CreatePostDialog({
                           {isGeneratingPost ? (
                             <>
                               <Sparkles className="h-4 w-4 mr-2 animate-spin" />
-                              Generating...
+                              <span className="animate-pulse">
+                                Generating...
+                              </span>
                             </>
                           ) : (
                             <>
