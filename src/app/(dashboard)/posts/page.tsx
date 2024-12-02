@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -82,6 +82,7 @@ export function Page() {
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 10;
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
 
   const togglePostExpansion = (postId: string) => {
     setExpandedPosts((prev) =>
@@ -121,20 +122,24 @@ export function Page() {
     );
   };
 
+  const handleSearch = useCallback(
+    async (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter") {
+        setDebouncedQuery(searchQuery);
+        setCurrentPage(1); // Reset to first page on new search
+      }
+    },
+    [searchQuery]
+  );
+
   const { data, isLoading, error, refetch } = useQuery<PaginatedResponse>({
-    queryKey: ["posts", activeTab, currentPage, searchQuery],
+    queryKey: ["posts", activeTab, currentPage, debouncedQuery],
     queryFn: async () => {
       const params = new URLSearchParams({
-        status:
-          activeTab === "all"
-            ? ""
-            : activeTab === "drafts"
-            ? "draft"
-            : activeTab,
-
+        status: activeTab === "all" ? "" : activeTab,
         page: currentPage.toString(),
         limit: postsPerPage.toString(),
-        ...(searchQuery && { search: searchQuery }),
+        ...(debouncedQuery && { search: debouncedQuery }),
       });
 
       const response = await fetch(`/api/posts/get?${params}`);
@@ -144,14 +149,6 @@ export function Page() {
       return response.json();
     },
   });
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      refetch();
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [searchQuery, refetch]);
 
   return (
     <SidebarProvider>
@@ -234,7 +231,8 @@ export function Page() {
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search posts..."
+                      onKeyDown={handleSearch}
+                      placeholder="Search posts and press Enter..."
                       className="pl-9 h-9 w-full bg-white"
                     />
                   </div>
