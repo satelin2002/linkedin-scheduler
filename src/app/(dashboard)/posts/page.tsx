@@ -207,7 +207,7 @@ export function Page() {
                     <div className="p-3 sm:p-4">
                       <div className="prose prose-sm max-w-none w-full">
                         <div className="flex flex-col sm:flex-row sm:items-start gap-3">
-                          <div className="flex-shrink-0 self-start">
+                          <div className="flex-shrink-0 self-start sm:self-center">
                             {post.status === "scheduled" && (
                               <TooltipProvider>
                                 <Tooltip>
@@ -252,7 +252,7 @@ export function Page() {
                             )}
                           </div>
 
-                          <div className="flex-1 min-w-0 overflow-hidden space-y-3 sm:space-y-0">
+                          <div className="flex-1 min-w-0 overflow-hidden space-y-3">
                             <div className="text-sm text-foreground overflow-hidden">
                               <p className="truncate pr-4 pb-1 text-black">
                                 {post.content.split(" ").slice(0, 15).join(" ")}
@@ -263,7 +263,7 @@ export function Page() {
                             </div>
 
                             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
-                              <span className="text-sm text-muted-foreground order-2 sm:order-1">
+                              <span className="text-sm text-muted-foreground">
                                 {post.status === "published" && (
                                   <>
                                     Published on{" "}
@@ -283,7 +283,7 @@ export function Page() {
                                   </>
                                 )}
                               </span>
-                              <div className="flex flex-wrap gap-2 min-w-0 overflow-hidden order-1 sm:order-2">
+                              <div className="flex flex-wrap gap-2 min-w-0 overflow-hidden">
                                 {post.topics.map((topic) => (
                                   <Badge
                                     key={topic}
@@ -297,7 +297,11 @@ export function Page() {
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-2 flex-shrink-0 pt-3 mt-3 border-t sm:pt-0 sm:mt-0 sm:border-t-0 sm:border-l sm:pl-4">
+                          <div
+                            className="flex items-center gap-2 flex-shrink-0 pt-3 mt-3 border-t 
+                            sm:pt-0 sm:mt-0 sm:border-t-0 sm:border-l sm:pl-4
+                            md:flex-row md:items-center md:gap-2"
+                          >
                             <div className="flex gap-1">
                               <TooltipProvider>
                                 <Tooltip>
@@ -305,7 +309,7 @@ export function Page() {
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                      className="h-8 w-8 p-0 hover:bg-secondary/20"
+                                      className="h-8 w-8 p-0 hover:bg-secondary hover:text-primary transition-colors duration-200"
                                     >
                                       <Calendar className="h-4 w-4 text-muted-foreground" />
                                     </Button>
@@ -322,7 +326,7 @@ export function Page() {
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                      className="h-8 w-8 p-0 hover:bg-secondary/20"
+                                      className="h-8 w-8 p-0 hover:bg-secondary hover:text-primary transition-colors duration-200"
                                     >
                                       <PenSquare className="h-4 w-4 text-muted-foreground" />
                                     </Button>
@@ -339,7 +343,7 @@ export function Page() {
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                      className="h-8 w-8 p-0 hover:bg-secondary/20"
+                                      className="h-8 w-8 p-0 hover:bg-secondary hover:text-primary transition-colors duration-200"
                                     >
                                       <Trash2 className="h-4 w-4 text-muted-foreground" />
                                     </Button>
@@ -349,30 +353,23 @@ export function Page() {
                                   </TooltipContent>
                                 </Tooltip>
                               </TooltipProvider>
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-8 w-8 p-0 hover:bg-secondary hover:text-primary transition-colors duration-200"
+                                    >
+                                      <Send className="h-4 w-4 text-muted-foreground" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Share post</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
                             </div>
-
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="hover:bg-secondary/20"
-                                    onClick={() =>
-                                      handlePostClick(post.content, post.topics)
-                                    }
-                                  >
-                                    <Send className="h-4 w-4 mr-2" />
-                                    <span className="hidden sm:inline">
-                                      Post
-                                    </span>
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Share post</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
                           </div>
                         </div>
                       </div>

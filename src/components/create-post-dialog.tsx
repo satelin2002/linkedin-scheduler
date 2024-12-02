@@ -121,7 +121,7 @@ export function CreatePostDialog() {
       // Replace with actual API call
       await new Promise((resolve) => setTimeout(resolve, 1500));
       setContent(
-        `Based on your input: "${customContent}"\n\n🎯 Key Points:\n• Point 1\n• Point 2\n• Point 3\n\n💡 Insights:\nYour custom content generated insights here...\n\n#CustomContent #Insights`
+        `Based on your input: "${customContent}"\n\n🎯 Key Points:\n• Point 1\n�� Point 2\n• Point 3\n\n💡 Insights:\nYour custom content generated insights here...\n\n#CustomContent #Insights`
       );
     } catch (error) {
       console.error("Failed to generate content:", error);
@@ -172,7 +172,10 @@ export function CreatePostDialog() {
                 <TabsContent value="default" className="space-y-6 pt-2">
                   {/* Step 1: Topic Selection */}
                   <div className="space-y-2">
-                    <h3 className="text-sm font-medium">1. Choose a Topic</h3>
+                    <h3 className="text-sm font-medium flex items-center">
+                      1. Choose a Topic
+                      <CircleHelp className="ml-2 h-4 w-4 text-muted-foreground" />
+                    </h3>
                     <p className="text-sm text-muted-foreground">
                       Select a topic that resonates with your audience and
                       expertise
@@ -216,7 +219,10 @@ export function CreatePostDialog() {
                   {/* Step 2: Idea Selection */}
                   {generatedIdeas.length > 0 && (
                     <div className="space-y-2">
-                      <h3 className="text-sm font-medium">2. Choose an Idea</h3>
+                      <h3 className="text-sm font-medium flex items-center">
+                        2. Choose an Idea
+                        <CircleHelp className="ml-2 h-4 w-4 text-muted-foreground" />
+                      </h3>
                       <p className="text-sm text-muted-foreground">
                         Pick an AI-generated idea to create engaging content for
                         your post
@@ -263,7 +269,10 @@ export function CreatePostDialog() {
                 <TabsContent value="custom" className="space-y-4">
                   <div className="space-y-4">
                     <div>
-                      <h3 className="text-sm font-medium mb-2">Your Topic</h3>
+                      <h3 className="text-sm font-medium mb-2 flex items-center">
+                        Your Topic
+                        <CircleHelp className="ml-2 h-4 w-4 text-muted-foreground" />
+                      </h3>
                       <Textarea
                         value={customContent}
                         onChange={(e) => setCustomContent(e.target.value)}
@@ -295,7 +304,10 @@ export function CreatePostDialog() {
 
               {/* Content Area with Action Icons */}
               <div className="space-y-2 mt-4">
-                <h3 className="text-sm font-medium">Content</h3>
+                <h3 className="text-sm font-medium flex items-center">
+                  Content
+                  <CircleHelp className="ml-2 h-4 w-4 text-muted-foreground" />
+                </h3>
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-muted-foreground">
                     Review and customize your post content before publishing
@@ -387,7 +399,7 @@ export function CreatePostDialog() {
                     </div>
                   </div>
 
-                  <div className="overflow-x-auto p-4 bg-slate-50">
+                  <div className="overflow-x-auto p-4 bg-slate-50 h-[455px] overflow-y-auto">
                     <div className="w-[380px] mx-auto bg-background transition-all duration-200">
                       <div className="rounded-lg border bg-card shadow-sm">
                         {/* Post Header */}
