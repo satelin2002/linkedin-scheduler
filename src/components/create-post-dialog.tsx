@@ -95,6 +95,8 @@ export function CreatePostDialog({
     post?.id || null
   );
   const [topicSearch, setTopicSearch] = useState("");
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [postTopics, setPostTopics] = useState<string[]>([]);
 
   const previewWidth = {
     desktop: "w-full",
@@ -152,7 +154,6 @@ export function CreatePostDialog({
       });
 
       const data = await response.json();
-
       if (!response.ok) {
         throw new Error(
           data.details || data.error || "Failed to generate post"
@@ -160,6 +161,7 @@ export function CreatePostDialog({
       }
 
       setContent(data.content);
+      setPostTopics(data.topics);
       toast.success("Post content generated successfully!");
     } catch (error: any) {
       console.error("Failed to generate post:", error);
@@ -233,19 +235,17 @@ export function CreatePostDialog({
       const endpoint = currentDraftId
         ? `/api/posts/${currentDraftId}`
         : "/api/posts";
-
       const method = currentDraftId ? "PUT" : "POST";
 
       const response = await fetch(endpoint, {
         method,
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           content,
           status: "draft",
           images: uploadedImages,
           visibility: "anyone",
+          topics: postTopics,
         }),
       });
 
@@ -286,6 +286,41 @@ export function CreatePostDialog({
   const filteredTopics = availableTopics.filter((topic) =>
     topic.toLowerCase().includes(topicSearch.toLowerCase())
   );
+
+  const handleGenerateImage = async () => {
+    if (!selectedTopic || !selectedIdea) {
+      toast.error("Please select both a topic and an idea first");
+      return;
+    }
+
+    setIsGeneratingImage(true);
+    try {
+      const response = await fetch("/api/generate/image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          topic: selectedTopic,
+          idea: selectedIdea,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(
+          data.details || data.error || "Failed to generate image"
+        );
+      }
+
+      // Add the generated image to uploadedImages
+      setUploadedImages((prev) => [...prev, data.imageUrl]);
+      toast.success("Image generated successfully!");
+    } catch (error: any) {
+      console.error("Failed to generate image:", error);
+      toast.error(error.message || "Failed to generate image");
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -503,7 +538,7 @@ export function CreatePostDialog({
                 </h3>
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-muted-foreground">
-                    Review and customize your post content before publishing
+                    Review and customize your post content
                   </p>
 
                   <div className="flex items-center gap-2">
@@ -517,20 +552,53 @@ export function CreatePostDialog({
                       multiple
                     />
 
+                    <div className="flex items-center gap-2">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={handleGenerateImage}
+                              disabled={isGeneratingImage}
+                              className="h-8 flex items-center gap-2"
+                            >
+                              {isGeneratingImage ? (
+                                <>
+                                  <Sparkles className="h-4 w-4 animate-spin" />
+                                  <span className="animate-pulse">
+                                    Generating...
+                                  </span>
+                                </>
+                              ) : (
+                                <>
+                                  <Wand2 className="h-4 w-4" />
+                                  <span>Generate AI Image</span>
+                                </>
+                              )}
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Generate image using AI</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 w-8 p-0"
                             onClick={handleImageClick}
+                            className="h-8 w-8 p-0"
                           >
                             <ImagePlus className="h-4 w-4 text-muted-foreground" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>Upload image</p>
+                          <p>Upload image from device</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -576,23 +644,6 @@ export function CreatePostDialog({
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
-
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0"
-                          >
-                            <Save className="h-4 w-4 text-muted-foreground" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Save as draft</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
                   </div>
                 </div>
 
@@ -626,8 +677,26 @@ export function CreatePostDialog({
                   placeholder="Write your post content..."
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  className="min-h-[200px] resize-none"
+                  className="min-h-[200px] resize-none whitespace-pre-wrap font-[inherit]"
                 />
+
+                {/* Display topics */}
+                {postTopics.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    <h3 className="text-sm font-medium"># HashTags</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {postTopics.map((topic, index) => (
+                        <Badge
+                          key={index}
+                          variant="secondary"
+                          className="text-sm py-1 px-3"
+                        >
+                          {topic}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
