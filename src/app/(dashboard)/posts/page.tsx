@@ -59,6 +59,7 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { CreatePostDialog } from "@/components/create-post-dialog";
 
 export function Page() {
   const router = useRouter();
@@ -188,22 +189,7 @@ export function Page() {
                       className="pl-9 h-9 w-full bg-white"
                     />
                   </div>
-
-                  <Link href="/posts/create">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button size="default">
-                            <Plus className="h-4 w-4 mr-2 " />
-                            Create Post
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Create new post</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </Link>
+                  <CreatePostDialog />
                 </div>
               </div>
 
@@ -268,7 +254,7 @@ export function Page() {
 
                           <div className="flex-1 min-w-0 overflow-hidden space-y-3 sm:space-y-0">
                             <div className="text-sm text-foreground overflow-hidden">
-                              <p className="truncate pr-4">
+                              <p className="truncate pr-4 pb-1">
                                 {post.content.split(" ").slice(0, 15).join(" ")}
                                 {post.content.split(" ").length > 15
                                   ? "..."
