@@ -208,15 +208,20 @@ export function Page() {
               </div>
 
               <div className="grid gap-4 mt-6 w-full max-w-full">
-                {paginatedPosts.map((post) => (
+                {paginatedPosts.map((post, index) => (
                   <div
                     key={post.id}
-                    className="rounded-lg border bg-card text-card-foreground shadow-sm h-fit"
+                    className={cn(
+                      "rounded-lg border bg-card text-card-foreground shadow-sm h-fit",
+                      "transform transition-all duration-300",
+                      "animate-in fade-in-50 slide-in-from-bottom-3",
+                      `delay-[${index * 50}ms]`
+                    )}
                   >
-                    <div className="p-4">
+                    <div className="p-3 sm:p-4">
                       <div className="prose prose-sm max-w-none w-full">
-                        <div className="flex items-center gap-3">
-                          <div className="flex-shrink-0">
+                        <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+                          <div className="flex-shrink-0 self-start">
                             {post.status === "scheduled" && (
                               <TooltipProvider>
                                 <Tooltip>
@@ -261,7 +266,7 @@ export function Page() {
                             )}
                           </div>
 
-                          <div className="flex-1 min-w-0 overflow-hidden">
+                          <div className="flex-1 min-w-0 overflow-hidden space-y-3 sm:space-y-0">
                             <div className="text-sm text-foreground overflow-hidden">
                               <p className="truncate pr-4">
                                 {post.content.split(" ").slice(0, 15).join(" ")}
@@ -271,8 +276,8 @@ export function Page() {
                               </p>
                             </div>
 
-                            <div className="flex items-center gap-4 mt-2">
-                              <span className="text-sm text-muted-foreground">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+                              <span className="text-sm text-muted-foreground order-2 sm:order-1">
                                 {post.status === "published" && (
                                   <>
                                     Published on{" "}
@@ -292,12 +297,12 @@ export function Page() {
                                   </>
                                 )}
                               </span>
-                              <div className="flex flex-wrap gap-2 min-w-0 overflow-hidden">
+                              <div className="flex flex-wrap gap-2 min-w-0 overflow-hidden order-1 sm:order-2">
                                 {post.topics.map((topic) => (
                                   <Badge
                                     key={topic}
                                     variant="secondary"
-                                    className="rounded-full"
+                                    className="rounded-full text-xs"
                                   >
                                     {topic}
                                   </Badge>
@@ -306,7 +311,7 @@ export function Page() {
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-2 flex-shrink-0 pl-4 border-l">
+                          <div className="flex items-center gap-2 flex-shrink-0 pt-3 mt-3 border-t sm:pt-0 sm:mt-0 sm:border-t-0 sm:border-l sm:pl-4">
                             <div className="flex gap-1">
                               <TooltipProvider>
                                 <Tooltip>
@@ -333,11 +338,11 @@ export function Page() {
                                       size="sm"
                                       className="h-8 w-8 p-0 hover:bg-secondary/20"
                                     >
-                                      <Clock className="h-4 w-4 text-muted-foreground" />
+                                      <PenSquare className="h-4 w-4 text-muted-foreground" />
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent>
-                                    <p>Set time</p>
+                                    <p>Edit post</p>
                                   </TooltipContent>
                                 </Tooltip>
                               </TooltipProvider>
@@ -359,6 +364,7 @@ export function Page() {
                                 </Tooltip>
                               </TooltipProvider>
                             </div>
+
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
@@ -371,7 +377,9 @@ export function Page() {
                                     }
                                   >
                                     <Send className="h-4 w-4 mr-2" />
-                                    Post
+                                    <span className="hidden sm:inline">
+                                      Post
+                                    </span>
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
