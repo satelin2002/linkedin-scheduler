@@ -39,6 +39,8 @@ import {
   PencilIcon,
   Clock10,
   AlarmClock,
+  PenTool,
+  PencilLine,
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -439,7 +441,7 @@ export function Page() {
                                       <Badge
                                         key={topic}
                                         variant="secondary"
-                                        className="rounded-lg text-xs"
+                                        className="rounded-lg text-sm"
                                       >
                                         {topic}
                                       </Badge>
@@ -463,8 +465,9 @@ export function Page() {
                                       "bg-green-500/10 text-green-700 border-green-300",
                                     post.status === "scheduled" &&
                                       "bg-blue-500/10 text-blue-700 border-blue-300",
+
                                     post.status === "draft" &&
-                                      "bg-orange-500/10 text-orange-700 border-orange-200"
+                                      "bg-blue-500/10 text-blue-700 border-blue-300"
                                   )}
                                 >
                                   {post.status === "published" && (
@@ -475,13 +478,13 @@ export function Page() {
                                   )}
                                   {post.status === "scheduled" && (
                                     <>
-                                      <AlarmClock className="h-3.5 w-3.5" />
+                                      <CalendarClock className="h-3.5 w-3.5" />
                                       Scheduled
                                     </>
                                   )}
                                   {post.status === "draft" && (
                                     <>
-                                      <PencilIcon className="h-3.5 w-3.5" />
+                                      <PenLine className="h-3.5 w-3.5" />
                                       Draft
                                     </>
                                   )}

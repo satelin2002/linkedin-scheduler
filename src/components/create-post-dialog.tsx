@@ -31,6 +31,7 @@ import {
   Calendar1Icon,
   Calendar,
   CheckCircle2,
+  CalendarClock,
 } from "lucide-react";
 import {
   Select,
@@ -68,8 +69,17 @@ import { format } from "date-fns";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { FormField } from "./ui/form";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "./ui/form";
 import { useQueryClient } from "@tanstack/react-query";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 
 interface CreatePostDialogProps {
   post?: Post | null;
@@ -398,6 +408,9 @@ export function CreatePostDialog({
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
+    defaultValues: {
+      scheduledDate: undefined,
+    },
   });
 
   // Add autosave effect
@@ -980,6 +993,68 @@ export function CreatePostDialog({
                   Post Saved
                 </div>
               ) : null}
+
+              <Form {...form}>
+                <FormField
+                  control={form.control}
+                  name="scheduledDate"
+                  render={({ field }) => (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "max-w-[250px] pl-3 text-left font-normal relative group",
+                              !field.value && "text-muted-foreground",
+                              field.value &&
+                                "bg-blue-50 border-blue-200 text-blue-700"
+                            )}
+                            disabled={
+                              (!content && uploadedImages.length === 0) ||
+                              isSaving
+                            }
+                          >
+                            {field.value ? (
+                              <div className="flex items-center gap-2">
+                                <CalendarClock className="h-4 w-4 text-blue-500" />
+                                <span>
+                                  Scheduled for{" "}
+                                  <span className="font-semibold">
+                                    {format(field.value, "MMM d, yyyy")}
+                                  </span>
+                                </span>
+                                <X
+                                  className="h-4 w-4 ml-auto     transition-opacity cursor-pointer text-blue-600 hover:text-blue-700"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    field.onChange(undefined);
+                                  }}
+                                />
+                              </div>
+                            ) : (
+                              <span className="flex items-center gap-2">
+                                <CalendarClock className="h-4 w-4" />
+                                Schedule Post
+                              </span>
+                            )}
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="end">
+                        <CalendarComponent
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date: Date) => date < new Date()}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                />
+              </Form>
+
               <Button
                 disabled={(!content && uploadedImages.length === 0) || isSaving}
                 onClick={handlePublish}
