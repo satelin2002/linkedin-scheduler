@@ -14,7 +14,6 @@ import {
   Plus,
   Wand2,
   Sparkles,
-  Calendar,
   Copy,
   Eye,
   Save,
@@ -28,6 +27,9 @@ import {
   FileUser,
   ImagePlus,
   X,
+  CalendarIcon,
+  Calendar1Icon,
+  Calendar,
 } from "lucide-react";
 import {
   Select,
@@ -56,6 +58,17 @@ import { Textarea } from "./ui/textarea";
 import { toast } from "sonner";
 import { Post } from "@prisma/client";
 import { Separator } from "@/components/ui/separator";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { format } from "date-fns";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { FormField } from "./ui/form";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface CreatePostDialogProps {
   post?: Post | null;
@@ -63,6 +76,10 @@ interface CreatePostDialogProps {
   onOpenChange?: (open: boolean) => void;
   onClose?: () => void;
 }
+
+const FormSchema = z.object({
+  scheduledDate: z.date().optional(),
+});
 
 export function CreatePostDialog({
   post,
@@ -98,12 +115,17 @@ export function CreatePostDialog({
   const [topicSearch, setTopicSearch] = useState("");
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [postTopics, setPostTopics] = useState<string[]>([]);
+  const [scheduledDate, setScheduledDate] = useState<Date | undefined>(
+    undefined
+  );
 
   const previewWidth = {
     desktop: "w-full",
     tablet: "w-[768px]",
     mobile: "w-[380px]",
   };
+
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (post) {
@@ -259,9 +281,13 @@ export function CreatePostDialog({
       const savedPost = await response.json();
       setCurrentDraftId(savedPost.id);
 
+      // Invalidate and refetch posts
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+
       toast.success("Post saved as draft");
       setShowSaved(true);
       setTimeout(() => setShowSaved(false), 5000);
+      onOpenChange?.(false); // Close dialog after saving
     } catch (error) {
       console.error("Error saving draft:", error);
       toast.error("Failed to save draft");
@@ -329,10 +355,46 @@ export function CreatePostDialog({
     }
   };
 
+  const handlePublish = async () => {
+    try {
+      const response = await fetch("/api/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content,
+          status: "published",
+          images: uploadedImages,
+          visibility: "anyone",
+          topics: postTopics,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to publish post");
+      }
+
+      // Invalidate and refetch posts
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+
+      toast.success("Post published successfully");
+      onOpenChange?.(false); // Close dialog after publishing
+    } catch (error) {
+      console.error("Error publishing post:", error);
+      toast.error("Failed to publish post");
+    }
+  };
+
+  const form = useForm<z.infer<typeof FormSchema>>({
+    resolver: zodResolver(FormSchema),
+  });
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button onClick={handleOpenDialog}>
+        <Button
+          onClick={handleOpenDialog}
+          className="bg-black text-white hover:bg-black/90"
+        >
           <Plus className="h-4 w-4 mr-2" />
           Create Post
         </Button>
@@ -464,7 +526,7 @@ export function CreatePostDialog({
                           <SelectTrigger className="w-[415px]">
                             <SelectValue placeholder="Select an idea" />
                           </SelectTrigger>
-                          <SelectContent className="w-[440px]">
+                          <SelectContent>
                             {generatedIdeas.map((idea) => (
                               <SelectItem
                                 key={idea}
@@ -562,11 +624,11 @@ export function CreatePostDialog({
                   {/* Uploaded Images Preview */}
                   {uploadedImages.length > 0 && (
                     <div className="mb-4">
-                      <div className="grid grid-cols-4 gap-4">
+                      <div className="grid grid-cols-4 gap-2 max-h-[120px]">
                         {uploadedImages.map((image, index) => (
                           <div
                             key={index}
-                            className="relative group aspect-square"
+                            className="relative group aspect-square h-[120px]"
                           >
                             <img
                               src={image}
@@ -575,9 +637,9 @@ export function CreatePostDialog({
                             />
                             <button
                               onClick={() => removeImage(index)}
-                              className="absolute -top-2 -right-2 p-1.5 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
+                              className="absolute -top-1 -right-1 p-1 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
                             >
-                              <X className="h-3.5 w-3.5" />
+                              <X className="h-3 w-3" />
                             </button>
                           </div>
                         ))}
@@ -623,9 +685,9 @@ export function CreatePostDialog({
                               disabled={isGeneratingImage}
                               className={cn(
                                 "h-8 flex items-center gap-2",
-                                "bg-gradient-to-r from-indigo-500/10 to-indigo-600/10",
-                                "hover:from-indigo-500/20 hover:to-purple-500/20",
-                                "text-indigo-600 border-indigo-200",
+                                "bg-gradient-to-r from-blue-400 to-indigo-400",
+                                "hover:from-blue-500 hover:to-indigo-600",
+                                "text-white border-[#86efac]",
                                 "transition-all duration-300"
                               )}
                             >
@@ -705,7 +767,7 @@ export function CreatePostDialog({
                           <Badge
                             key={index}
                             variant="secondary"
-                            className="text-sm py-1 px-3"
+                            className="text-xs py-1 px-3"
                           >
                             {topic}
                           </Badge>
@@ -859,7 +921,11 @@ export function CreatePostDialog({
                   <Save className="h-4 w-4 mr-2" />
                   Save as Draft
                 </Button>
-                <Button>
+
+                <Button
+                  disabled={!content && uploadedImages.length === 0}
+                  onClick={handlePublish}
+                >
                   <Send className="h-4 w-4 mr-2" />
                   Publish Post
                 </Button>

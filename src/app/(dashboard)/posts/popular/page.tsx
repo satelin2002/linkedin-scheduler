@@ -58,6 +58,11 @@ export default function PopularPostsPage() {
     router.push(`/posts/create?content=${encodedContent}`);
   };
 
+  const handleCreatePost = () => {
+    // Redirect to posts page with a query parameter to open dialog
+    router.push("/posts?openDialog=true");
+  };
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -84,15 +89,14 @@ export default function PopularPostsPage() {
                   </Breadcrumb>
                 </div>
 
-                <Link href="/posts/create">
-                  <Button
-                    className="bg-black hover:bg-black/90 text-white"
-                    size="default"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Post
-                  </Button>
-                </Link>
+                <Button
+                  onClick={handleCreatePost}
+                  className="bg-black hover:bg-black/90 text-white"
+                  size="default"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Post
+                </Button>
               </div>
             </header>
 

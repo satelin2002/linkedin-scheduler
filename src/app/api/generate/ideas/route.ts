@@ -17,20 +17,22 @@ Make them unique and attention-grabbing.
 Format each idea on a new line starting with a number.`;
 
     const completion = await openai.chat.completions.create({
-      messages: [{ role: "user", content: prompt }],
+      messages: [
+        {
+          role: "user",
+          content: `${prompt}\n\nNote: Generate ideas without quotation marks.`,
+        },
+      ],
       model: "gpt-3.5-turbo",
+      temperature: 0.7,
+      max_tokens: 500,
     });
 
-    const content = completion.choices[0].message.content;
-    if (!content) {
-      throw new Error("No content generated");
-    }
-
-    // Parse the response into an array of ideas
-    const ideas = content
-      .split("\n")
-      .filter((line) => line.trim() && /^\d+\.?\s*.+/.test(line))
-      .map((line) => line.replace(/^\d+\.?\s*/, "").trim());
+    const ideas =
+      completion.choices[0]?.message?.content
+        ?.split("\n")
+        .map((idea) => idea.trim().replace(/['"]/g, ""))
+        .filter(Boolean) || [];
 
     if (!Array.isArray(ideas) || ideas.length === 0) {
       throw new Error("Failed to parse ideas");

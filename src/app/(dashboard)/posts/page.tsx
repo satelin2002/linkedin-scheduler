@@ -55,7 +55,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -85,6 +85,13 @@ export function Page() {
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get("openDialog") === "true") {
+      setIsDialogOpen(true);
+    }
+  }, [searchParams]);
 
   const togglePostExpansion = (postId: string) => {
     setExpandedPosts((prev) =>
