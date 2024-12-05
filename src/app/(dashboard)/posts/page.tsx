@@ -35,6 +35,7 @@ import {
   GalleryVerticalEnd,
   FolderClock,
   FolderPen,
+  MoreVertical,
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -64,6 +65,12 @@ import { useQuery } from "@tanstack/react-query";
 import { Post, PostStatus } from "@prisma/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type PaginatedResponse = {
   posts: Post[];
@@ -429,7 +436,7 @@ export function Page() {
                                       <Badge
                                         key={topic}
                                         variant="secondary"
-                                        className="rounded-full text-xs"
+                                        className="rounded-lg text-xs"
                                       >
                                         {topic}
                                       </Badge>
@@ -438,84 +445,78 @@ export function Page() {
                                 </div>
                               </div>
 
-                              <div
-                                className="flex items-center gap-2 flex-shrink-0 pt-3 mt-3 border-t 
-                                sm:pt-0 sm:mt-0 sm:border-t-0 sm:border-l sm:pl-4
-                                md:flex-row md:items-center md:gap-2"
-                              >
-                                <div className="flex gap-1">
-                                  <TooltipProvider>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          className="h-8 w-8 p-0 hover:bg-secondary hover:text-primary transition-colors duration-200"
-                                        >
-                                          <Calendar className="h-4 w-4 text-muted-foreground" />
-                                        </Button>
-                                      </TooltipTrigger>
-                                      <TooltipContent>
-                                        <p>Schedule post</p>
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  </TooltipProvider>
-
-                                  <TooltipProvider>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          className="h-8 w-8 p-0 hover:bg-secondary hover:text-primary transition-colors duration-200"
-                                          onClick={() => {
-                                            setEditingPost(post);
-                                            setIsDialogOpen(true);
-                                          }}
-                                        >
-                                          <PenSquare className="h-4 w-4 text-muted-foreground" />
-                                        </Button>
-                                      </TooltipTrigger>
-                                      <TooltipContent>
-                                        <p>Edit post</p>
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  </TooltipProvider>
-
-                                  {post.status !== "published" && (
-                                    <TooltipProvider>
-                                      <Tooltip>
-                                        <TooltipTrigger asChild>
-                                          <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="h-8 w-8 p-0 hover:bg-secondary hover:text-primary transition-colors duration-200"
-                                          >
-                                            <Trash2 className="h-4 w-4 text-muted-foreground" />
-                                          </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                          <p>Delete post</p>
-                                        </TooltipContent>
-                                      </Tooltip>
-                                    </TooltipProvider>
+                              <div className="flex items-center gap-2 flex-shrink-0 pt-3 mt-3 border-t sm:pt-0 sm:mt-0 sm:border-t-0 sm:border-l sm:pl-4 md:flex-row md:items-center md:gap-2 font-normal">
+                                <Badge
+                                  variant={
+                                    post.status === "published"
+                                      ? "default"
+                                      : post.status === "scheduled"
+                                      ? "secondary"
+                                      : "outline"
+                                  }
+                                  className={cn(
+                                    "rounded-lg text-sm px-2 py-1 flex items-center gap-2 font-medium",
+                                    post.status === "published" &&
+                                      "bg-green-500/10 text-green-700 border-green-300",
+                                    post.status === "scheduled" &&
+                                      "bg-blue-500/10 text-blue-700 border-blue-300",
+                                    post.status === "draft" &&
+                                      "bg-gray-500/10 text-gray-700 border-gray-300"
                                   )}
-                                  <TooltipProvider>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          className="h-8 w-8 p-0 hover:bg-secondary hover:text-primary transition-colors duration-200"
-                                        >
-                                          <Send className="h-4 w-4 text-muted-foreground" />
-                                        </Button>
-                                      </TooltipTrigger>
-                                      <TooltipContent>
-                                        <p>Share post</p>
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  </TooltipProvider>
+                                >
+                                  {post.status === "published" && (
+                                    <>
+                                      <BookCheck className="h-3.5 w-3.5" />
+                                      Published
+                                    </>
+                                  )}
+                                  {post.status === "scheduled" && (
+                                    <>
+                                      <FolderClock className="h-3.5 w-3.5" />
+                                      Scheduled
+                                    </>
+                                  )}
+                                  {post.status === "draft" && (
+                                    <>
+                                      <FolderPen className="h-3.5 w-3.5" />
+                                      Draft
+                                    </>
+                                  )}
+                                </Badge>
+
+                                <div className="flex gap-1">
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        // className="h-8 w-8 p-0 hover:bg-secondary hover:text-primary transition-colors duration-200"
+                                      >
+                                        <MoreVertical className="h-5 w-5 text-muted-foreground" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent
+                                      align="end"
+                                      className="w-[140px] animate-in slide-in-from-right-5 duration-200"
+                                    >
+                                      <DropdownMenuItem
+                                        className="flex items-center gap-2 cursor-pointer"
+                                        onClick={() => {
+                                          setEditingPost(post);
+                                          setIsDialogOpen(true);
+                                        }}
+                                      >
+                                        <PenSquare className="h-4 w-4 text-muted-foreground" />
+                                        <span>Edit</span>
+                                      </DropdownMenuItem>
+
+                                      {post.status !== "published" && (
+                                        <DropdownMenuItem className="flex items-center gap-2 cursor-pointer text-red-600 hover:text-red-700 focus:text-red-700">
+                                          <Trash2 className="h-4 w-4" />
+                                          <span>Delete</span>
+                                        </DropdownMenuItem>
+                                      )}
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
                                 </div>
                               </div>
                             </div>

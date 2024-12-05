@@ -52,16 +52,12 @@ const data = {
       isActive: true,
       items: [
         {
-          title: "Create Post",
-          url: "/posts/create",
+          title: "My Posts",
+          url: "/posts",
         },
         {
           title: "Popular Posts",
           url: "/posts/popular",
-        },
-        {
-          title: "My Posts",
-          url: "/posts",
         },
         {
           title: "Calendar",

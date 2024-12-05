@@ -30,6 +30,7 @@ import {
   CalendarIcon,
   Calendar1Icon,
   Calendar,
+  CheckCircle2,
 } from "lucide-react";
 import {
   Select,
@@ -398,6 +399,51 @@ export function CreatePostDialog({
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
+
+  // Add autosave effect
+  useEffect(() => {
+    const autoSave = async () => {
+      if (!content && uploadedImages.length === 0) return;
+
+      setIsSaving(true);
+      try {
+        const endpoint = currentDraftId
+          ? `/api/posts/${currentDraftId}`
+          : "/api/posts";
+        const method = currentDraftId ? "PUT" : "POST";
+
+        const response = await fetch(endpoint, {
+          method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            content,
+            status: "draft",
+            images: uploadedImages,
+            visibility: "anyone",
+            topics: postTopics,
+          }),
+        });
+
+        if (!response.ok) throw new Error("Failed to save draft");
+
+        const savedPost = await response.json();
+        setCurrentDraftId(savedPost.id);
+        queryClient.invalidateQueries({ queryKey: ["posts"] });
+
+        // Just set saved status without timeout
+        setShowSaved(true);
+      } catch (error) {
+        console.error("Error auto-saving:", error);
+        toast.error("Failed to save draft");
+      } finally {
+        setIsSaving(false);
+      }
+    };
+
+    // Debounce the autosave
+    const timeoutId = setTimeout(autoSave, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [content, uploadedImages, postTopics]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -916,40 +962,31 @@ export function CreatePostDialog({
             <Button
               variant="outline"
               onClick={() => {
-                onOpenChange?.(false); // Close the dialog
-                handleCloseDialog(); // Clean up state
+                onOpenChange?.(false);
+                handleCloseDialog();
               }}
             >
               Cancel
             </Button>
             <div className="flex items-center gap-4">
-              {isSaving && (
-                <span className="text-sm text-muted-foreground animate-in fade-in slide-in-from-right-3">
-                  Saving...
-                </span>
-              )}
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={handleSaveAsDraft}
-                  disabled={
-                    (!content && uploadedImages.length === 0) || isSaving
-                  }
-                >
-                  <Save className="h-4 w-4 mr-2" />
-                  Save as Draft
-                </Button>
-
-                <Button
-                  disabled={
-                    (!content && uploadedImages.length === 0) || isSaving
-                  }
-                  onClick={handlePublish}
-                >
-                  <Send className="h-4 w-4 mr-2" />
-                  Publish Post
-                </Button>
-              </div>
+              {isSaving ? (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Saving Post...
+                </div>
+              ) : showSaved ? (
+                <div className="flex items-center gap-2 text-sm text-green-600 border border-green-200 bg-green-50 px-3 py-1.5 rounded-md">
+                  <CheckCircle2 className="h-4 w-4" />
+                  Post Saved
+                </div>
+              ) : null}
+              <Button
+                disabled={(!content && uploadedImages.length === 0) || isSaving}
+                onClick={handlePublish}
+              >
+                <Send className="h-4 w-4 mr-2" />
+                Publish Post
+              </Button>
             </div>
           </div>
         </div>
