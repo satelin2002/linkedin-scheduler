@@ -36,6 +36,9 @@ import {
   FolderClock,
   FolderPen,
   MoreVertical,
+  PencilIcon,
+  Clock10,
+  AlarmClock,
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -461,24 +464,24 @@ export function Page() {
                                     post.status === "scheduled" &&
                                       "bg-blue-500/10 text-blue-700 border-blue-300",
                                     post.status === "draft" &&
-                                      "bg-gray-500/10 text-gray-700 border-gray-300"
+                                      "bg-orange-500/10 text-orange-700 border-orange-200"
                                   )}
                                 >
                                   {post.status === "published" && (
                                     <>
-                                      <BookCheck className="h-3.5 w-3.5" />
+                                      <CheckCircle2 className="h-3.5 w-3.5" />
                                       Published
                                     </>
                                   )}
                                   {post.status === "scheduled" && (
                                     <>
-                                      <FolderClock className="h-3.5 w-3.5" />
+                                      <AlarmClock className="h-3.5 w-3.5" />
                                       Scheduled
                                     </>
                                   )}
                                   {post.status === "draft" && (
                                     <>
-                                      <FolderPen className="h-3.5 w-3.5" />
+                                      <PencilIcon className="h-3.5 w-3.5" />
                                       Draft
                                     </>
                                   )}
