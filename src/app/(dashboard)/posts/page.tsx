@@ -460,12 +460,11 @@ export function Page() {
                                       : "outline"
                                   }
                                   className={cn(
-                                    "rounded-lg text-sm px-2 py-1 flex items-center gap-2 font-medium",
+                                    "rounded-lg text-sm px-2 py-1 flex items-center gap-2 font-medium select-none pointer-events-none",
                                     post.status === "published" &&
                                       "bg-green-500/10 text-green-700 border-green-300",
                                     post.status === "scheduled" &&
-                                      "bg-blue-500/10 text-blue-700 border-blue-300",
-
+                                      "bg-orange-500/10 text-orange-700 border-orange-300",
                                     post.status === "draft" &&
                                       "bg-blue-500/10 text-blue-700 border-blue-300"
                                   )}

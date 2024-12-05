@@ -16,7 +16,8 @@ export const PUT = auth(async function PUT(req, { params }) {
       return NextResponse.json({ error: "Invalid session" }, { status: 401 });
     }
 
-    const postId = params?.id;
+    const postId = await params?.id;
+
     if (!postId || Array.isArray(postId)) {
       return NextResponse.json({ error: "Invalid post ID" }, { status: 400 });
     }

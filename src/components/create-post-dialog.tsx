@@ -129,6 +129,9 @@ export function CreatePostDialog({
   const [scheduledDate, setScheduledDate] = useState<Date | undefined>(
     undefined
   );
+  const [isScheduling, setIsScheduling] = useState(false);
+  const [hasContentChanged, setHasContentChanged] = useState(false);
+  const initialContent = useRef<string>("");
   const [isSaving, setIsSaving] = useState(false);
 
   const previewWidth = {
@@ -143,6 +146,8 @@ export function CreatePostDialog({
     if (post) {
       setContent(post.content);
       setCurrentDraftId(post.id);
+      initialContent.current = post.content;
+      setHasContentChanged(false);
     }
   }, [post]);
 
@@ -277,7 +282,7 @@ export function CreatePostDialog({
   };
 
   const handleSaveAsDraft = async () => {
-    setIsSaving(true);
+    setIsScheduling(true);
     try {
       const endpoint = currentDraftId
         ? `/api/posts/${currentDraftId}`
@@ -306,13 +311,13 @@ export function CreatePostDialog({
       setCurrentDraftId(savedPost.id);
       queryClient.invalidateQueries({ queryKey: ["posts"] });
 
-      toast.success("Draft saved successfully");
-      onOpenChange?.(false);
+      // Just set saved status without timeout
+      setShowSaved(true);
     } catch (error) {
-      console.error("Error saving draft:", error);
+      console.error("Error auto-saving:", error);
       toast.error("Failed to save draft");
     } finally {
-      setIsSaving(false);
+      setIsScheduling(false);
     }
   };
 
@@ -330,6 +335,10 @@ export function CreatePostDialog({
     setShowPreview(false);
     setPreviewDevice("desktop");
     setTopicSearch("");
+    // Reset form values including scheduledDate
+    form.reset({
+      scheduledDate: undefined,
+    });
   };
 
   const handleCloseDialog = () => {
@@ -406,6 +415,37 @@ export function CreatePostDialog({
     }
   };
 
+  const handleSchedulePost = async (date: Date) => {
+    setIsScheduling(true);
+    try {
+      const response = await fetch("/api/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content,
+          status: "scheduled",
+          scheduledFor: date.toISOString(),
+          images: uploadedImages,
+          visibility: "anyone",
+          topics: postTopics,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to schedule post");
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      toast.success("Post scheduled successfully");
+    } catch (error) {
+      console.error("Error scheduling post:", error);
+      toast.error("Failed to schedule post");
+      form.reset({ scheduledDate: undefined });
+    } finally {
+      setIsScheduling(false);
+    }
+  };
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -413,9 +453,14 @@ export function CreatePostDialog({
     },
   });
 
-  // Add autosave effect
+  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setContent(e.target.value);
+    setHasContentChanged(e.target.value !== initialContent.current);
+  };
+
   useEffect(() => {
     const autoSave = async () => {
+      if (!hasContentChanged) return;
       if (!content && uploadedImages.length === 0) return;
 
       setIsSaving(true);
@@ -442,8 +487,6 @@ export function CreatePostDialog({
         const savedPost = await response.json();
         setCurrentDraftId(savedPost.id);
         queryClient.invalidateQueries({ queryKey: ["posts"] });
-
-        // Just set saved status without timeout
         setShowSaved(true);
       } catch (error) {
         console.error("Error auto-saving:", error);
@@ -453,10 +496,9 @@ export function CreatePostDialog({
       }
     };
 
-    // Debounce the autosave
     const timeoutId = setTimeout(autoSave, 1000);
     return () => clearTimeout(timeoutId);
-  }, [content, uploadedImages, postTopics]);
+  }, [content, uploadedImages, postTopics, hasContentChanged]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -720,7 +762,7 @@ export function CreatePostDialog({
                   <Textarea
                     placeholder="Write your post content..."
                     value={content}
-                    onChange={(e) => setContent(e.target.value)}
+                    onChange={handleContentChange}
                     className="min-h-[200px] resize-none whitespace-pre-wrap font-[inherit]"
                   />
 
@@ -734,7 +776,7 @@ export function CreatePostDialog({
                               variant="outline"
                               size="sm"
                               onClick={handleImageClick}
-                              disabled={isSaving || !content}
+                              disabled={isScheduling || !content}
                               className="h-8 w-8 p-0"
                             >
                               <ImagePlus className="h-4 w-4 text-muted-foreground" />
@@ -754,7 +796,7 @@ export function CreatePostDialog({
                               size="sm"
                               onClick={handleGenerateImage}
                               disabled={
-                                isGeneratingImage || isSaving || !content
+                                isGeneratingImage || isScheduling || !content
                               }
                               className={cn(
                                 "h-8 flex items-center gap-2",
@@ -793,27 +835,9 @@ export function CreatePostDialog({
                             <Button
                               variant="ghost"
                               size="sm"
-                              disabled={isSaving || !content}
-                              className="h-8 w-8 p-0"
-                            >
-                              <Calendar className="h-4 w-4 text-muted-foreground" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Schedule post</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
                               className="h-8 w-8 p-0"
                               onClick={handleCopyContent}
-                              disabled={isSaving || !content}
+                              disabled={isScheduling || !content}
                             >
                               <Copy
                                 className={cn(
@@ -1008,11 +1032,12 @@ export function CreatePostDialog({
                               "max-w-[250px] pl-3 text-left font-normal relative group",
                               !field.value && "text-muted-foreground",
                               field.value &&
-                                "bg-blue-50 border-blue-200 text-blue-700"
+                                "bg-blue-50 border-blue-200 text-blue-700",
+                              isScheduling && "opacity-70"
                             )}
                             disabled={
                               (!content && uploadedImages.length === 0) ||
-                              isSaving
+                              isScheduling
                             }
                           >
                             {field.value ? (
@@ -1025,13 +1050,55 @@ export function CreatePostDialog({
                                   </span>
                                 </span>
                                 <X
-                                  className="h-4 w-4 ml-auto     transition-opacity cursor-pointer text-blue-600 hover:text-blue-700"
-                                  onClick={(e) => {
+                                  className="h-4 w-4 ml-auto transition-opacity cursor-pointer text-blue-600 hover:text-blue-700"
+                                  onClick={async (e) => {
                                     e.stopPropagation();
-                                    field.onChange(undefined);
+                                    setIsScheduling(true);
+                                    try {
+                                      const response = await fetch(
+                                        "/api/posts",
+                                        {
+                                          method: "POST",
+                                          headers: {
+                                            "Content-Type": "application/json",
+                                          },
+                                          body: JSON.stringify({
+                                            content,
+                                            status: "draft",
+                                            images: uploadedImages,
+                                            visibility: "anyone",
+                                            topics: postTopics,
+                                          }),
+                                        }
+                                      );
+
+                                      if (!response.ok)
+                                        throw new Error(
+                                          "Failed to save as draft"
+                                        );
+
+                                      queryClient.invalidateQueries({
+                                        queryKey: ["posts"],
+                                      });
+                                      field.onChange(undefined);
+                                      toast.success("Post saved as draft");
+                                    } catch (error) {
+                                      console.error(
+                                        "Error saving draft:",
+                                        error
+                                      );
+                                      toast.error("Failed to save as draft");
+                                    } finally {
+                                      setIsScheduling(false);
+                                    }
                                   }}
                                 />
                               </div>
+                            ) : isScheduling ? (
+                              <span className="flex items-center gap-2">
+                                <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                                <span>Scheduling...</span>
+                              </span>
                             ) : (
                               <span className="flex items-center gap-2">
                                 <CalendarClock className="h-4 w-4" />
@@ -1045,7 +1112,12 @@ export function CreatePostDialog({
                         <CalendarComponent
                           mode="single"
                           selected={field.value}
-                          onSelect={field.onChange}
+                          onSelect={(date) => {
+                            if (date) {
+                              field.onChange(date);
+                              handleSchedulePost(date);
+                            }
+                          }}
                           disabled={(date: Date) => date < new Date()}
                           initialFocus
                         />
@@ -1056,7 +1128,9 @@ export function CreatePostDialog({
               </Form>
 
               <Button
-                disabled={(!content && uploadedImages.length === 0) || isSaving}
+                disabled={
+                  (!content && uploadedImages.length === 0) || isScheduling
+                }
                 onClick={handlePublish}
               >
                 <Send className="h-4 w-4 mr-2" />
