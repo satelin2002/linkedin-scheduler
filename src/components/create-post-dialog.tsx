@@ -118,6 +118,7 @@ export function CreatePostDialog({
   const [scheduledDate, setScheduledDate] = useState<Date | undefined>(
     undefined
   );
+  const [isSaving, setIsSaving] = useState(false);
 
   const previewWidth = {
     desktop: "w-full",
@@ -203,9 +204,15 @@ export function CreatePostDialog({
   };
 
   const handleCopyContent = async () => {
-    await navigator.clipboard.writeText(content);
-    setCopySuccess(true);
-    setTimeout(() => setCopySuccess(false), 2000);
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopySuccess(true);
+      toast.success("Content copied to clipboard");
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch (error) {
+      console.error("Failed to copy content:", error);
+      toast.error("Failed to copy content");
+    }
   };
 
   const handleGenerateFromCustom = async () => {
@@ -213,10 +220,13 @@ export function CreatePostDialog({
 
     setIsGenerating(true);
     try {
-      const response = await fetch("/api/generate", {
+      const response = await fetch("/api/generate/post", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic: customContent }),
+        body: JSON.stringify({
+          topic: "Custom",
+          idea: customContent,
+        }),
       });
 
       if (!response.ok) {
@@ -225,6 +235,8 @@ export function CreatePostDialog({
 
       const data = await response.json();
       setContent(data.content);
+      setPostTopics(data.topics);
+      toast.success("Post content generated successfully!");
     } catch (error) {
       console.error("Failed to generate content:", error);
       toast.error("Failed to generate content");
@@ -254,6 +266,7 @@ export function CreatePostDialog({
   };
 
   const handleSaveAsDraft = async () => {
+    setIsSaving(true);
     try {
       const endpoint = currentDraftId
         ? `/api/posts/${currentDraftId}`
@@ -280,17 +293,15 @@ export function CreatePostDialog({
 
       const savedPost = await response.json();
       setCurrentDraftId(savedPost.id);
-
-      // Invalidate and refetch posts
       queryClient.invalidateQueries({ queryKey: ["posts"] });
 
-      toast.success("Post saved as draft");
-      setShowSaved(true);
-      setTimeout(() => setShowSaved(false), 5000);
-      onOpenChange?.(false); // Close dialog after saving
+      toast.success("Draft saved successfully");
+      onOpenChange?.(false);
     } catch (error) {
       console.error("Error saving draft:", error);
       toast.error("Failed to save draft");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -655,7 +666,7 @@ export function CreatePostDialog({
                   />
 
                   {/* Action Icons moved below textarea */}
-                  <div className="flex items-center justify-between pt-2   mt-2">
+                  <div className="flex items-center justify-between pt-2 mt-2">
                     <div className="flex items-center gap-2">
                       <TooltipProvider>
                         <Tooltip>
@@ -664,6 +675,7 @@ export function CreatePostDialog({
                               variant="outline"
                               size="sm"
                               onClick={handleImageClick}
+                              disabled={isSaving || !content}
                               className="h-8 w-8 p-0"
                             >
                               <ImagePlus className="h-4 w-4 text-muted-foreground" />
@@ -682,7 +694,9 @@ export function CreatePostDialog({
                               variant="outline"
                               size="sm"
                               onClick={handleGenerateImage}
-                              disabled={isGeneratingImage}
+                              disabled={
+                                isGeneratingImage || isSaving || !content
+                              }
                               className={cn(
                                 "h-8 flex items-center gap-2",
                                 "bg-gradient-to-r from-blue-400 to-indigo-400",
@@ -720,6 +734,7 @@ export function CreatePostDialog({
                             <Button
                               variant="ghost"
                               size="sm"
+                              disabled={isSaving || !content}
                               className="h-8 w-8 p-0"
                             >
                               <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -739,6 +754,7 @@ export function CreatePostDialog({
                               size="sm"
                               className="h-8 w-8 p-0"
                               onClick={handleCopyContent}
+                              disabled={isSaving || !content}
                             >
                               <Copy
                                 className={cn(
@@ -767,7 +783,7 @@ export function CreatePostDialog({
                           <Badge
                             key={index}
                             variant="secondary"
-                            className="text-xs py-1 px-3"
+                            className="text-xs py-1 px-3 font-medium"
                           >
                             {topic}
                           </Badge>
@@ -907,23 +923,27 @@ export function CreatePostDialog({
               Cancel
             </Button>
             <div className="flex items-center gap-4">
-              {showSaved && (
-                <span className="text-sm text-green-500 animate-in fade-in slide-in-from-right-3">
-                  Saved
+              {isSaving && (
+                <span className="text-sm text-muted-foreground animate-in fade-in slide-in-from-right-3">
+                  Saving...
                 </span>
               )}
               <div className="flex gap-2">
                 <Button
                   variant="outline"
                   onClick={handleSaveAsDraft}
-                  disabled={!content && uploadedImages.length === 0}
+                  disabled={
+                    (!content && uploadedImages.length === 0) || isSaving
+                  }
                 >
                   <Save className="h-4 w-4 mr-2" />
                   Save as Draft
                 </Button>
 
                 <Button
-                  disabled={!content && uploadedImages.length === 0}
+                  disabled={
+                    (!content && uploadedImages.length === 0) || isSaving
+                  }
                   onClick={handlePublish}
                 >
                   <Send className="h-4 w-4 mr-2" />
