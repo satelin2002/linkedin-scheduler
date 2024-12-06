@@ -19,6 +19,7 @@ export function PostCalendar() {
   const [deletePostId, setDeletePostId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const postsContainerRef = useRef<HTMLDivElement>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const { data: posts, isLoading } = useQuery<Post[]>({
     queryKey: ["calendar-posts"],
@@ -35,6 +36,7 @@ export function PostCalendar() {
 
   const handleDeletePost = async () => {
     if (!deletePostId) return;
+    setIsDeleting(true);
 
     try {
       const response = await fetch(`/api/posts/${deletePostId}`, {
@@ -50,6 +52,7 @@ export function PostCalendar() {
       console.error("Error deleting post:", error);
       toast.error("Failed to delete post");
     } finally {
+      setIsDeleting(false);
       setDeletePostId(null);
     }
   };
@@ -81,19 +84,21 @@ export function PostCalendar() {
   };
 
   return (
-    <div className="p-4 overflow-auto">
+    <div className="p-2 overflow-auto">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-xl font-semibold">Scheduled Posts</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            View and manage your upcoming scheduled posts. Click on a date to
-            see posts scheduled for that day.
+            View and manage your upcoming scheduled posts.{" "}
+            <span className="hidden md:inline font-medium underline underline-offset-4">
+              Click on a date to see posts scheduled for that day.
+            </span>
           </p>
         </div>
       </div>
 
       <div className="grid md:grid-cols-[300px,1fr] gap-8">
-        <div className="border rounded-lg p-4 h-fit mt-2">
+        <div className="border rounded-lg pl-6  h-fit mt-2">
           <Calendar
             mode="single"
             selected={selectedDate}
@@ -182,7 +187,7 @@ export function PostCalendar() {
                             {post.content}
                           </p>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1">
                           <Button
                             variant="ghost"
                             size="sm"
@@ -209,12 +214,13 @@ export function PostCalendar() {
 
       <ConfirmDialog
         open={!!deletePostId}
-        onOpenChange={(open) => !open && setDeletePostId(null)}
+        onOpenChange={(open) => !isDeleting && !open && setDeletePostId(null)}
         onConfirm={handleDeletePost}
         title="Delete Post"
         description="Are you sure you want to delete this scheduled post? This action cannot be undone."
-        confirmText="Delete"
+        confirmText={isDeleting ? "Deleting Post..." : "Delete"}
         cancelText="Cancel"
+        disabled={isDeleting}
       />
     </div>
   );

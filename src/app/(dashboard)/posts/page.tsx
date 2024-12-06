@@ -102,6 +102,7 @@ export function Page() {
   const searchParams = useSearchParams();
   const [deletePostId, setDeletePostId] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const { data, isLoading, error, refetch } = useQuery<PaginatedResponse>({
     queryKey: ["posts", activeTab, currentPage, debouncedQuery],
@@ -185,6 +186,7 @@ export function Page() {
 
   const handleDeletePost = async () => {
     if (!deletePostId) return;
+    setIsDeleting(true);
 
     try {
       const response = await fetch(`/api/posts/${deletePostId}`, {
@@ -199,6 +201,7 @@ export function Page() {
       console.error("Error deleting post:", error);
       toast.error("Failed to delete post");
     } finally {
+      setIsDeleting(false);
       setDeletePostId(null);
     }
   };
@@ -468,7 +471,7 @@ export function Page() {
                                       </>
                                     )}
                                   </span>
-                                  <div className="flex flex-wrap gap-2 min-w-0 overflow-hidden">
+                                  {/* <div className="flex flex-wrap gap-2 min-w-0 overflow-hidden">
                                     {post.topics?.map((topic) => (
                                       <Badge
                                         key={topic}
@@ -478,7 +481,7 @@ export function Page() {
                                         {topic}
                                       </Badge>
                                     ))}
-                                  </div>
+                                  </div> */}
                                 </div>
                               </div>
 
@@ -598,12 +601,13 @@ export function Page() {
       </SidebarInset>
       <ConfirmDialog
         open={!!deletePostId}
-        onOpenChange={(open) => !open && setDeletePostId(null)}
+        onOpenChange={(open) => !isDeleting && !open && setDeletePostId(null)}
         onConfirm={handleDeletePost}
         title="Delete Post"
         description="Are you sure you want to delete this post? This action cannot be undone."
-        confirmText="Delete"
+        confirmText={isDeleting ? "Deleting Post..." : "Delete"}
         cancelText="Cancel"
+        disabled={isDeleting}
       />
     </SidebarProvider>
   );

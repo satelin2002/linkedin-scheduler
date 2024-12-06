@@ -17,6 +17,7 @@ interface ConfirmDialogProps {
   description: string;
   confirmText?: string;
   cancelText?: string;
+  disabled?: boolean;
 }
 
 export function ConfirmDialog({
@@ -27,6 +28,7 @@ export function ConfirmDialog({
   description,
   confirmText = "Confirm",
   cancelText = "Cancel",
+  disabled = false,
 }: ConfirmDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -36,12 +38,17 @@ export function ConfirmDialog({
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={disabled}
+          >
             {cancelText}
           </Button>
           <Button
             onClick={onConfirm}
             className={cn("bg-rose-600 text-white hover:bg-rose-700")}
+            disabled={disabled}
           >
             {confirmText}
           </Button>

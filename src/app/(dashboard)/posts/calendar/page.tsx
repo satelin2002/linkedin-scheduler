@@ -64,7 +64,7 @@ export default function CalendarPage() {
           </div>
         </header>
 
-        <div className="p-6">
+        <div className="p-4">
           <div className="max-w-7xl mx-auto space-y-6">
             <PostCalendar />
           </div>
