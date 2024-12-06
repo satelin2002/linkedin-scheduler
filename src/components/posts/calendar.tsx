@@ -70,9 +70,11 @@ export function PostCalendar() {
     if (element && postsContainerRef.current) {
       const container = postsContainerRef.current;
       const elementTop = element.offsetTop;
+      const containerTop = container.getBoundingClientRect().top;
       const margin = 16; // 16px margin from top
+
       container.scrollTo({
-        top: elementTop - margin,
+        top: elementTop - containerTop - margin,
         behavior: "smooth",
       });
     }
@@ -91,7 +93,7 @@ export function PostCalendar() {
       </div>
 
       <div className="grid md:grid-cols-[300px,1fr] gap-8">
-        <div className="border rounded-lg p-4 h-fit">
+        <div className="border rounded-lg p-4 h-fit mt-2">
           <Calendar
             mode="single"
             selected={selectedDate}
@@ -107,10 +109,21 @@ export function PostCalendar() {
                 const key = format(date, "yyyy-MM-dd");
                 return !!scheduledDates?.[key]?.length;
               },
+              today: (date) => {
+                return (
+                  format(date, "yyyy-MM-dd") ===
+                  format(new Date(), "yyyy-MM-dd")
+                );
+              },
             }}
             modifiersStyles={{
               scheduled: {
                 backgroundColor: "rgba(59, 130, 246, 0.1)",
+                borderRadius: "4px",
+              },
+              today: {
+                backgroundColor: "black",
+                color: "white",
                 borderRadius: "4px",
               },
             }}
@@ -118,7 +131,7 @@ export function PostCalendar() {
         </div>
 
         <div
-          className="space-y-4 overflow-auto max-h-[calc(100vh-16rem)] px-4"
+          className="space-y-4 overflow-auto max-h-[calc(100vh-16rem)] px-4 py-2"
           ref={postsContainerRef}
         >
           {isLoading
