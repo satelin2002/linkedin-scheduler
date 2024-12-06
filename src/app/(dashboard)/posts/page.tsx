@@ -124,17 +124,17 @@ export function Page() {
 
   useEffect(() => {
     if (searchParams.get("openDialog") === "true") {
-      const postId = searchParams.get("postId");
-      if (postId) {
-        // Fetch the post and set it for editing
-        const post = data?.posts.find((p) => p.id === postId);
-        if (post) {
-          setEditingPost(post);
-        }
+      const content = searchParams.get("content");
+      if (content) {
+        // Set the content in the dialog
+        setEditingPost({
+          ...editingPost,
+          content: decodeURIComponent(content),
+        });
       }
       setIsDialogOpen(true);
     }
-  }, [searchParams, data?.posts]);
+  }, [searchParams]);
 
   const togglePostExpansion = (postId: string) => {
     setExpandedPosts((prev) =>

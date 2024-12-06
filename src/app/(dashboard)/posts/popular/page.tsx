@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 export default function PopularPostsPage() {
   const router = useRouter();
@@ -52,10 +53,10 @@ export default function PopularPostsPage() {
   };
 
   // Add function to handle post navigation
-  const handlePostClick = (content: string) => {
-    // Encode the content to safely pass it in the URL
-    const encodedContent = encodeURIComponent(content);
-    router.push(`/posts/create?content=${encodedContent}`);
+  const handlePostClick = (post: PopularPost) => {
+    // Encode the content and navigate to posts page with dialog trigger
+    const encodedContent = encodeURIComponent(post.content);
+    router.push(`/posts?openDialog=true&content=${encodedContent}`);
   };
 
   const handleCreatePost = () => {
@@ -114,9 +115,12 @@ export default function PopularPostsPage() {
                     <Badge
                       key={topic.name}
                       variant={
-                        selectedTopic === topic.name ? "default" : "secondary"
+                        selectedTopic === topic.name ? "secondary" : "outline"
                       }
-                      className="cursor-pointer px-4 py-1.5 text-sm"
+                      className={cn(
+                        "cursor-pointer px-4 py-1.5 text-sm",
+                        selectedTopic === topic.name && "border-primary"
+                      )}
                       onClick={() => setSelectedTopic(topic.name)}
                     >
                       {topic.name}
@@ -226,7 +230,7 @@ export default function PopularPostsPage() {
                                             </Button>
                                           </TooltipTrigger>
                                           <TooltipContent className="bg-black text-white border-black">
-                                            Save post
+                                            Save as draft
                                           </TooltipContent>
                                         </Tooltip>
                                       </TooltipProvider>
@@ -236,6 +240,9 @@ export default function PopularPostsPage() {
                                             <Button
                                               variant="ghost"
                                               size="sm"
+                                              onClick={() =>
+                                                handlePostClick(post)
+                                              }
                                               className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary"
                                             >
                                               <PenSquare className="h-4 w-4" />
@@ -255,7 +262,7 @@ export default function PopularPostsPage() {
                                             variant="outline"
                                             className="hover:bg-secondary/20"
                                             onClick={() =>
-                                              handlePostClick(post.content)
+                                              handlePostClick(post)
                                             }
                                           >
                                             <Send className="h-4 w-4 mr-2" />
