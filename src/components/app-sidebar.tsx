@@ -6,6 +6,7 @@ import {
   Command,
   GalleryVerticalEnd,
   Settings2,
+  Sparkles,
   SquareTerminal,
 } from "lucide-react";
 
@@ -19,6 +20,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { Button } from "./ui/button";
 
 // This is sample data.
 const data = {
@@ -100,9 +102,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
+
         {/* <NavProjects projects={data.projects} /> */}
       </SidebarContent>
       <SidebarFooter>
+        <div className="flex flex-col items-center gap-2 p-4 m-4 mb-12 rounded-lg border border-dashed border-primary/50 bg-gradient-to-b from-black to-black/70">
+          <Sparkles className="h-8 w-8 text-white" />
+          <h3 className="font-semibold text-white">Upgrade to Pro</h3>
+          <p className="text-sm text-white/80 text-center">
+            Get access to advanced features, priority support, unlimited posts,
+            custom branding, and analytics
+          </p>
+          <Button variant="outline" size="sm" className="w-full">
+            Upgrade Now
+          </Button>
+        </div>
         <NavUser user={data.user} />
       </SidebarFooter>
       <SidebarRail />

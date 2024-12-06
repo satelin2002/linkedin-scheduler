@@ -9,6 +9,7 @@ import {
   LogOut,
   Sparkles,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -45,6 +46,7 @@ export function NavUser({
       });
     } catch (error) {
       console.error("Sign out error:", error);
+      toast.error("Failed to sign out. Try again.");
     }
   }
 
