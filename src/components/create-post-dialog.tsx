@@ -133,6 +133,7 @@ export function CreatePostDialog({
   const [hasContentChanged, setHasContentChanged] = useState(false);
   const initialContent = useRef<string>("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isCancelingSchedule, setIsCancelingSchedule] = useState(false);
 
   const previewWidth = {
     desktop: "w-full",
@@ -1040,7 +1041,9 @@ export function CreatePostDialog({
                               isScheduling
                             }
                           >
-                            {field.value ? (
+                            {field.value &&
+                            !isScheduling &&
+                            !isCancelingSchedule ? (
                               <div className="flex items-center gap-2">
                                 <CalendarClock className="h-4 w-4 text-blue-500" />
                                 <span>
@@ -1053,7 +1056,7 @@ export function CreatePostDialog({
                                   className="h-4 w-4 ml-auto transition-opacity cursor-pointer text-blue-600 hover:text-blue-700"
                                   onClick={async (e) => {
                                     e.stopPropagation();
-                                    setIsScheduling(true);
+                                    setIsCancelingSchedule(true);
                                     try {
                                       const response = await fetch(
                                         "/api/posts",
@@ -1081,23 +1084,38 @@ export function CreatePostDialog({
                                         queryKey: ["posts"],
                                       });
                                       field.onChange(undefined);
-                                      toast.success("Post saved as draft");
+                                      toast.success(
+                                        "Schedule removed, post saved as draft"
+                                      );
                                     } catch (error) {
                                       console.error(
                                         "Error saving draft:",
                                         error
                                       );
-                                      toast.error("Failed to save as draft");
+                                      toast.error("Failed to remove schedule");
                                     } finally {
-                                      setIsScheduling(false);
+                                      setIsCancelingSchedule(false);
                                     }
                                   }}
                                 />
                               </div>
-                            ) : isScheduling ? (
+                            ) : isCancelingSchedule && !isScheduling ? (
                               <span className="flex items-center gap-2">
                                 <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
-                                <span>Scheduling...</span>
+                                <span>Removing schedule...</span>
+                              </span>
+                            ) : isScheduling && !isCancelingSchedule ? (
+                              <span className="flex items-center gap-2">
+                                <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                                <span>
+                                  Scheduling
+                                  {field.value
+                                    ? ` for ${format(
+                                        field.value,
+                                        "MMM d, yyyy"
+                                      )}`
+                                    : ""}
+                                </span>
                               </span>
                             ) : (
                               <span className="flex items-center gap-2">
