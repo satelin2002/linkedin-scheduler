@@ -57,3 +57,37 @@ export const PUT = auth(async function PUT(req, { params }) {
     );
   }
 });
+
+export const DELETE = auth(async function DELETE(req, { params }) {
+  try {
+    if (!req.auth?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
+
+    if (!id) {
+      return NextResponse.json({ error: "Invalid post ID" }, { status: 400 });
+    }
+
+    // Soft delete by updating isDeleted flag
+    await prisma.post.update({
+      where: {
+        id: id as string,
+        authorId: req.auth.user.id,
+      },
+      data: {
+        isDeleted: true,
+        deletedAt: new Date(),
+      },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("[DELETE_POST]", error);
+    return NextResponse.json(
+      { error: "Failed to delete post" },
+      { status: 500 }
+    );
+  }
+});

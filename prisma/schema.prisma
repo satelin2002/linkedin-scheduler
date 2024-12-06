@@ -127,6 +127,9 @@ model Post {
   // Post metadata
   distributionMetrics DistributionMetrics?
   
+  isDeleted Boolean @default(false)
+  deletedAt DateTime?
+  
   @@index([authorId])
   @@index([status])
   @@index([scheduledFor])

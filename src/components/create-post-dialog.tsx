@@ -134,6 +134,7 @@ export function CreatePostDialog({
   const initialContent = useRef<string>("");
   const [isSaving, setIsSaving] = useState(false);
   const [isCancelingSchedule, setIsCancelingSchedule] = useState(false);
+  const [contentGenerated, setContentGenerated] = useState(false);
 
   const previewWidth = {
     desktop: "w-full",
@@ -163,15 +164,13 @@ export function CreatePostDialog({
         body: JSON.stringify({ topic: selectedTopic }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to generate ideas");
-      }
+      if (!response.ok) throw new Error("Failed to generate ideas");
 
       const data = await response.json();
       setGeneratedIdeas(data.ideas);
     } catch (error) {
       console.error("Failed to generate ideas:", error);
-      toast.error("Failed to generate ideas");
+      toast.error("Failed to generate ideas. Please try again.");
     } finally {
       setIsGeneratingIdeas(false);
     }
@@ -203,6 +202,7 @@ export function CreatePostDialog({
 
       setContent(data.content);
       setPostTopics(data.topics);
+      setContentGenerated(true);
       toast.success("Post content generated successfully!");
     } catch (error: any) {
       console.error("Failed to generate post:", error);
@@ -283,7 +283,7 @@ export function CreatePostDialog({
   };
 
   const handleSaveAsDraft = async () => {
-    setIsScheduling(true);
+    setIsSaving(true);
     try {
       const endpoint = currentDraftId
         ? `/api/posts/${currentDraftId}`
@@ -318,7 +318,7 @@ export function CreatePostDialog({
       console.error("Error auto-saving:", error);
       toast.error("Failed to save draft");
     } finally {
-      setIsScheduling(false);
+      setIsSaving(false);
     }
   };
 
@@ -336,7 +336,8 @@ export function CreatePostDialog({
     setShowPreview(false);
     setPreviewDevice("desktop");
     setTopicSearch("");
-    // Reset form values including scheduledDate
+    setContentGenerated(false);
+    setShowSaved(false);
     form.reset({
       scheduledDate: undefined,
     });
@@ -346,6 +347,21 @@ export function CreatePostDialog({
     onClose?.();
     setContent("");
     setCurrentDraftId(null);
+    setSelectedTopic("");
+    setGeneratedIdeas([]);
+    setSelectedIdea("");
+    setUploadedImages([]);
+    setPostTopics([]);
+    setCustomContent("");
+    setIsExpanded(false);
+    setShowPreview(false);
+    setPreviewDevice("desktop");
+    setTopicSearch("");
+    setContentGenerated(false);
+    setShowSaved(false);
+    form.reset({
+      scheduledDate: undefined,
+    });
   };
 
   const filteredTopics = availableTopics.filter((topic) =>
@@ -461,10 +477,10 @@ export function CreatePostDialog({
 
   useEffect(() => {
     const autoSave = async () => {
-      if (!hasContentChanged) return;
       if (!content && uploadedImages.length === 0) return;
 
       setIsSaving(true);
+      setShowSaved(false);
       try {
         const endpoint = currentDraftId
           ? `/api/posts/${currentDraftId}`
@@ -491,18 +507,37 @@ export function CreatePostDialog({
         setShowSaved(true);
       } catch (error) {
         console.error("Error auto-saving:", error);
-        toast.error("Failed to save draft");
+        toast.error("Failed to save draft. Your changes may be lost.");
       } finally {
         setIsSaving(false);
       }
     };
 
-    const timeoutId = setTimeout(autoSave, 1000);
+    const timeoutId = setTimeout(autoSave, 3000);
     return () => clearTimeout(timeoutId);
-  }, [content, uploadedImages, postTopics, hasContentChanged]);
+  }, [content, uploadedImages, postTopics]);
+
+  useEffect(() => {
+    if (contentGenerated) {
+      setIsSaving(true);
+      setIsScheduling(false);
+      handleSaveAsDraft().finally(() => {
+        setIsSaving(false);
+        setContentGenerated(false);
+      });
+    }
+  }, [contentGenerated]);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(open) => {
+        if (!open) {
+          handleCloseDialog();
+        }
+        onOpenChange?.(open);
+      }}
+    >
       <DialogTrigger asChild>
         <Button
           onClick={handleOpenDialog}
@@ -802,8 +837,8 @@ export function CreatePostDialog({
                               className={cn(
                                 "h-8 flex items-center gap-2",
                                 "bg-gradient-to-r from-blue-400 to-indigo-400",
-                                "hover:from-blue-500 hover:to-indigo-600",
-                                "text-white border-[#86efac]",
+                                "hover:from-blue-500/80 hover:to-indigo-500/80",
+                                "text-white border-[#86efac] hover:border-[#86efac]/80 hover:text-white",
                                 "transition-all duration-300"
                               )}
                             >
@@ -1007,7 +1042,7 @@ export function CreatePostDialog({
               Cancel
             </Button>
             <div className="flex items-center gap-4">
-              {isSaving ? (
+              {isSaving && !showSaved ? (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Saving Post...
@@ -1104,7 +1139,7 @@ export function CreatePostDialog({
                                 <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
                                 <span>Removing schedule...</span>
                               </span>
-                            ) : isScheduling && !isCancelingSchedule ? (
+                            ) : isScheduling ? (
                               <span className="flex items-center gap-2">
                                 <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
                                 <span>

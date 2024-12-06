@@ -30,13 +30,14 @@ export const GET = auth(async function GET(req) {
     // Build where clause
     const where = {
       authorId: userId,
+      isDeleted: false,
       ...(status ? { status } : {}),
       ...(search
         ? {
-            content: {
-              contains: search,
-              mode: "insensitive" as const,
-            },
+            OR: [
+              { content: { contains: search, mode: "insensitive" as const } },
+              { topics: { hasSome: [search] } },
+            ],
           }
         : {}),
     };

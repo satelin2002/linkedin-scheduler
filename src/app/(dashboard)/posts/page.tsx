@@ -66,7 +66,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CreatePostDialog } from "@/components/create-post-dialog";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Post, PostStatus } from "@prisma/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -76,6 +76,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { toast } from "sonner";
 
 type PaginatedResponse = {
   posts: Post[];
@@ -98,6 +100,8 @@ export function Page() {
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const searchParams = useSearchParams();
+  const [deletePostId, setDeletePostId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (searchParams.get("openDialog") === "true") {
@@ -170,6 +174,26 @@ export function Page() {
       return response.json();
     },
   });
+
+  const handleDeletePost = async () => {
+    if (!deletePostId) return;
+
+    try {
+      const response = await fetch(`/api/posts/${deletePostId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) throw new Error("Failed to delete post");
+
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      toast.success("Post deleted successfully");
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      toast.error("Failed to delete post");
+    } finally {
+      setDeletePostId(null);
+    }
+  };
 
   return (
     <SidebarProvider>
@@ -451,44 +475,6 @@ export function Page() {
                               </div>
 
                               <div className="flex items-center gap-2 flex-shrink-0 pt-3 mt-3 border-t sm:pt-0 sm:mt-0 sm:border-t-0 sm:border-l sm:pl-4 md:flex-row md:items-center md:gap-2 font-normal">
-                                <Badge
-                                  variant={
-                                    post.status === "published"
-                                      ? "default"
-                                      : post.status === "scheduled"
-                                      ? "secondary"
-                                      : "outline"
-                                  }
-                                  className={cn(
-                                    "rounded-lg text-sm px-2 py-1 flex items-center gap-2 font-medium select-none pointer-events-none",
-                                    post.status === "published" &&
-                                      "bg-green-500/10 text-green-700 border-green-300",
-                                    post.status === "scheduled" &&
-                                      "bg-orange-500/10 text-orange-700 border-orange-300",
-                                    post.status === "draft" &&
-                                      "bg-blue-500/10 text-blue-700 border-blue-300"
-                                  )}
-                                >
-                                  {post.status === "published" && (
-                                    <>
-                                      <CheckCircle2 className="h-3.5 w-3.5" />
-                                      Published
-                                    </>
-                                  )}
-                                  {post.status === "scheduled" && (
-                                    <>
-                                      <CalendarClock className="h-3.5 w-3.5" />
-                                      Scheduled
-                                    </>
-                                  )}
-                                  {post.status === "draft" && (
-                                    <>
-                                      <PenLine className="h-3.5 w-3.5" />
-                                      Draft
-                                    </>
-                                  )}
-                                </Badge>
-
                                 <div className="flex gap-1">
                                   <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
@@ -515,7 +501,12 @@ export function Page() {
                                       </DropdownMenuItem>
 
                                       {post.status !== "published" && (
-                                        <DropdownMenuItem className="flex items-center gap-2 cursor-pointer text-red-600 hover:text-red-700 focus:text-red-700">
+                                        <DropdownMenuItem
+                                          className="flex items-center gap-2 cursor-pointer text-red-600 hover:text-red-700 focus:text-red-700"
+                                          onClick={() =>
+                                            setDeletePostId(post.id)
+                                          }
+                                        >
                                           <Trash2 className="h-4 w-4" />
                                           <span>Delete</span>
                                         </DropdownMenuItem>
@@ -597,6 +588,15 @@ export function Page() {
           </div>
         </div>
       </SidebarInset>
+      <ConfirmDialog
+        open={!!deletePostId}
+        onOpenChange={(open) => !open && setDeletePostId(null)}
+        onConfirm={handleDeletePost}
+        title="Delete Post"
+        description="Are you sure you want to delete this post? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+      />
     </SidebarProvider>
   );
 }
