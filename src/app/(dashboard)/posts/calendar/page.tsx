@@ -20,9 +20,11 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { CreatePostDialog } from "@/components/create-post-dialog";
 
 export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const nextMonth = () => {
     setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)));
@@ -54,13 +56,11 @@ export default function CalendarPage() {
               </Breadcrumb>
             </div>
 
-            <Button
-              className="bg-black hover:bg-black/90 text-white"
-              size="default"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Create Post
-            </Button>
+            <CreatePostDialog
+              open={isDialogOpen}
+              onOpenChange={setIsDialogOpen}
+              onClose={() => setIsDialogOpen(false)}
+            />
           </div>
         </header>
 

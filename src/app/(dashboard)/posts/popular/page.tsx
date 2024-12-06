@@ -37,11 +37,13 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { CreatePostDialog } from "@/components/create-post-dialog";
 
 export default function PopularPostsPage() {
   const router = useRouter();
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [expandedPosts, setExpandedPosts] = useState<string[]>([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Function to toggle post expansion
   const togglePostExpansion = (postId: string) => {
@@ -60,8 +62,7 @@ export default function PopularPostsPage() {
   };
 
   const handleCreatePost = () => {
-    // Redirect to posts page with a query parameter to open dialog
-    router.push("/posts?openDialog=true");
+    setIsDialogOpen(true);
   };
 
   return (
@@ -90,14 +91,11 @@ export default function PopularPostsPage() {
                   </Breadcrumb>
                 </div>
 
-                <Button
-                  onClick={handleCreatePost}
-                  className="bg-black hover:bg-black/90 text-white"
-                  size="default"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Post
-                </Button>
+                <CreatePostDialog
+                  open={isDialogOpen}
+                  onOpenChange={setIsDialogOpen}
+                  onClose={() => setIsDialogOpen(false)}
+                />
               </div>
             </header>
 

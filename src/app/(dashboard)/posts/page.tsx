@@ -122,19 +122,19 @@ export function Page() {
     },
   });
 
-  useEffect(() => {
-    if (searchParams.get("openDialog") === "true") {
-      const content = searchParams.get("content");
-      if (content) {
-        // Set the content in the dialog
-        setEditingPost({
-          ...editingPost,
-          content: decodeURIComponent(content),
-        });
-      }
-      setIsDialogOpen(true);
-    }
-  }, [searchParams]);
+  // useEffect(() => {
+  //   if (searchParams.get("openDialog") === "true") {
+  //     const content = searchParams.get("content");
+  //     if (content) {
+  //       // Set the content in the dialog
+  //       setEditingPost({
+  //         ...editingPost,
+  //         content: decodeURIComponent(content),
+  //       });
+  //     }
+  //     setIsDialogOpen(true);
+  //   }
+  // }, [searchParams]);
 
   const togglePostExpansion = (postId: string) => {
     setExpandedPosts((prev) =>
