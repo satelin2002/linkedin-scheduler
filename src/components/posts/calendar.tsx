@@ -1,218 +1,196 @@
 "use client";
 
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Calendar } from "@/components/ui/calendar";
+import { Post } from "@prisma/client";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { format } from "date-fns";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { toast } from "sonner";
+import { PenSquare, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, MoreHorizontal } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
-interface CalendarProps {
-  currentDate: Date;
-}
-
-interface ScheduledPost {
-  id: string;
-  content: string;
-  topics: string[];
-  scheduledFor: Date;
-}
-
-export function Calendar({ currentDate }: CalendarProps) {
+export function PostCalendar() {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const [deletePostId, setDeletePostId] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const postsContainerRef = useRef<HTMLDivElement>(null);
 
-  // Mock scheduled posts with realistic content
-  const scheduledPosts: ScheduledPost[] = [
-    {
-      id: "1",
-      content:
-        "Excited to announce our new AI-powered content scheduling feature! 🚀 #ProductLaunch #AI #Innovation",
-      topics: ["Product Launch", "AI"],
-      scheduledFor: new Date(2024, 11, 15, 10, 0),
+  const { data: posts, isLoading } = useQuery<Post[]>({
+    queryKey: ["calendar-posts"],
+    queryFn: async () => {
+      const response = await fetch("/api/posts/calendar");
+      if (!response.ok) throw new Error("Failed to fetch posts");
+      return response.json();
     },
-    {
-      id: "2",
-      content:
-        "Join me at the upcoming Digital Marketing Summit where I'll be speaking about the future of social media strategy. Limited seats available! 🎯",
-      topics: ["Event", "Marketing"],
-      scheduledFor: new Date(2024, 11, 15, 14, 30),
-    },
-    {
-      id: "3",
-      content:
-        "5 Tips for Building a Strong Personal Brand on LinkedIn:\n1. Consistent Content\n2. Authentic Voice\n3. Engage Daily\n4. Share Expertise\n5. Quality Network",
-      topics: ["Personal Branding", "Tips"],
-      scheduledFor: new Date(2024, 10, 18, 9, 0),
-    },
-    {
-      id: "4",
-      content:
-        "We're hiring! Looking for a Senior Full Stack Developer to join our growing team. Remote work available. DM for details. #TechJobs #Hiring",
-      topics: ["Hiring", "Tech"],
-      scheduledFor: new Date(2024, 11, 20, 11, 0),
-    },
-    {
-      id: "5",
-      content:
-        "Celebrating 5 years of innovation and growth! Thank you to our amazing team and clients who made this journey possible. 🎉 #Milestone #Growth",
-      topics: ["Company News", "Celebration"],
-      scheduledFor: new Date(2024, 2, 22, 13, 0),
-    },
-    {
-      id: "6",
-      content:
-        "New blog post: 'The Impact of AI on Content Creation' - Read how AI is transforming the way we create and distribute content. Link in comments!",
-      topics: ["Blog", "AI"],
-      scheduledFor: new Date(2024, 10, 25, 15, 30),
-    },
-    {
-      id: "7",
-      content:
-        "Weekly tech tip: Use keyboard shortcuts to boost your productivity. What's your favorite shortcut? Share below! 💻 #ProductivityTips #Tech",
-      topics: ["Tech Tips", "Productivity"],
-      scheduledFor: new Date(2024, 10, 28, 10, 30),
-    },
-    {
-      id: "8",
-      content:
-        "Proud to be featured in @TechMagazine's '30 Under 30' list! Grateful for this recognition and excited for what's ahead. 🏆",
-      topics: ["Achievement", "Recognition"],
-      scheduledFor: new Date(2024, 10, 25, 16, 0),
-    },
-  ];
+  });
 
-  const getDaysInMonth = (date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  const handleEditPost = (post: Post) => {
+    router.push(`/posts?openDialog=true&postId=${post.id}`);
   };
 
-  const getFirstDayOfMonth = (date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-  };
+  const handleDeletePost = async () => {
+    if (!deletePostId) return;
 
-  const handleEditPost = (postId: string) => {
-    const post = scheduledPosts.find((p) => p.id === postId);
-    if (post) {
-      const encodedContent = encodeURIComponent(post.content);
-      const encodedTopics = encodeURIComponent(JSON.stringify(post.topics));
-      router.push(
-        `/posts/create?content=${encodedContent}&topics=${encodedTopics}`
-      );
+    try {
+      const response = await fetch(`/api/posts/${deletePostId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) throw new Error("Failed to delete post");
+
+      await queryClient.invalidateQueries({ queryKey: ["calendar-posts"] });
+      await queryClient.invalidateQueries({ queryKey: ["posts"] });
+      toast.success("Post deleted successfully");
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      toast.error("Failed to delete post");
+    } finally {
+      setDeletePostId(null);
     }
   };
 
-  const handleDeletePost = (postId: string) => {
-    // Implement delete functionality
-    console.log("Delete post:", postId);
-  };
-
-  const renderPostActions = (post: ScheduledPost) => (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-6 w-6 absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
-        >
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-40 p-2">
-        <div className="flex flex-col gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full justify-start"
-            onClick={() => handleEditPost(post.id)}
-          >
-            <Pencil className="h-4 w-4 mr-2" />
-            Edit
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full justify-start text-destructive hover:text-destructive"
-            onClick={() => handleDeletePost(post.id)}
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Delete
-          </Button>
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
-
-  const renderCalendarDays = () => {
-    const days = [];
-    const daysInMonth = getDaysInMonth(currentDate);
-    const firstDay = getFirstDayOfMonth(currentDate);
-
-    // Add empty cells for days before the first day of the month
-    for (let i = 0; i < firstDay; i++) {
-      days.push(
-        <div key={`empty-${i}`} className="h-32 border border-border/50" />
-      );
+  const scheduledDates = posts?.reduce((acc, post) => {
+    if (post.scheduledFor) {
+      const date = new Date(post.scheduledFor);
+      const key = format(date, "yyyy-MM-dd");
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(post);
     }
+    return acc;
+  }, {} as Record<string, Post[]>);
 
-    // Add cells for each day of the month
-    for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        day
-      );
-      const postsForDay = scheduledPosts.filter(
-        (post) => post.scheduledFor.toDateString() === date.toDateString()
-      );
-
-      days.push(
-        <div key={day} className="h-32 border border-border/50 p-2">
-          <div className="font-medium text-sm mb-2">{day}</div>
-          <div className="space-y-1">
-            {postsForDay.map((post) => (
-              <div key={post.id} className="relative group">
-                <div
-                  className={cn(
-                    "text-xs p-2 rounded bg-primary/10 cursor-pointer truncate pr-8",
-                    "hover:bg-primary/20 transition-colors"
-                  )}
-                >
-                  {post.content.slice(0, 50)}...
-                </div>
-                {renderPostActions(post)}
-              </div>
-            ))}
-          </div>
-        </div>
-      );
+  const scrollToDate = (date: Date) => {
+    const dateStr = format(date, "yyyy-MM-dd");
+    const element = document.getElementById(`date-${dateStr}`);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-
-    return days;
   };
 
   return (
-    <div className="w-full">
-      <div className="grid grid-cols-7 gap-px">
-        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-          <div
-            key={day}
-            className="h-10 flex items-center justify-center font-medium text-sm"
-          >
-            {day}
-          </div>
-        ))}
-        {renderCalendarDays()}
+    <div className="p-4 overflow-auto">
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-xl font-semibold">Scheduled Posts</h1>
       </div>
+
+      <div className="grid md:grid-cols-[300px,1fr] gap-8">
+        <div className="border rounded-lg p-4 h-fit">
+          <Calendar
+            mode="single"
+            selected={selectedDate}
+            onSelect={(date: Date | undefined) => {
+              if (date) {
+                setSelectedDate(date);
+                scrollToDate(date);
+              }
+            }}
+            className="rounded-md"
+            modifiers={{
+              scheduled: (date) => {
+                const key = format(date, "yyyy-MM-dd");
+                return !!scheduledDates?.[key]?.length;
+              },
+            }}
+            modifiersStyles={{
+              scheduled: {
+                backgroundColor: "rgba(59, 130, 246, 0.1)",
+                borderRadius: "4px",
+              },
+            }}
+          />
+        </div>
+
+        <div
+          className="space-y-4 overflow-auto max-h-[calc(100vh-16rem)] p-4"
+          ref={postsContainerRef}
+        >
+          {isLoading
+            ? [...Array(3)].map((_, i) => (
+                <div key={i} className="border rounded-lg p-4 space-y-4">
+                  <Skeleton className="h-6 w-32" />
+                  <div className="space-y-4">
+                    {[...Array(2)].map((_, j) => (
+                      <div key={j} className="flex items-start justify-between">
+                        <div className="space-y-2 flex-1">
+                          <Skeleton className="h-4 w-20" />
+                          <Skeleton className="h-4 w-full" />
+                        </div>
+                        <div className="flex items-center gap-2 ml-4">
+                          <Skeleton className="h-8 w-8" />
+                          <Skeleton className="h-8 w-8" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))
+            : Object.entries(scheduledDates || {}).map(([date, posts]) => (
+                <div
+                  key={date}
+                  id={`date-${date}`}
+                  className={cn(
+                    "border rounded-lg p-4",
+                    selectedDate &&
+                      format(selectedDate, "yyyy-MM-dd") === date &&
+                      "ring-2 ring-blue-500"
+                  )}
+                >
+                  <h2 className="font-medium mb-4">
+                    {format(new Date(date), "MMMM d, yyyy")}
+                  </h2>
+                  <div className="space-y-4">
+                    {posts.map((post) => (
+                      <div
+                        key={post.id}
+                        className="flex items-start  justify-between border-l-4 border-blue-500 bg-blue-50/50 p-4 rounded-r-lg"
+                      >
+                        <div>
+                          <p className="text-sm text-gray-600">
+                            {format(new Date(post.scheduledFor!), "h:mm a")}
+                          </p>
+                          <p className="mt-1 line-clamp-2 text-sm">
+                            {post.content}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditPost(post)}
+                          >
+                            <PenSquare className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setDeletePostId(post.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+        </div>
+      </div>
+
+      <ConfirmDialog
+        open={!!deletePostId}
+        onOpenChange={(open) => !open && setDeletePostId(null)}
+        onConfirm={handleDeletePost}
+        title="Delete Post"
+        description="Are you sure you want to delete this scheduled post? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+      />
     </div>
   );
 }

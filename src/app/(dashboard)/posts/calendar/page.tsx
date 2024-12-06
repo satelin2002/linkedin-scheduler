@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
-import { Calendar } from "@/components/posts/calendar";
+import { PostCalendar } from "@/components/posts/calendar";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
@@ -54,37 +54,19 @@ export default function CalendarPage() {
               </Breadcrumb>
             </div>
 
-            <Link href="/posts/create">
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-black hover:bg-secondary/20"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Create Post
-              </Button>
-            </Link>
+            <Button
+              className="bg-black hover:bg-black/90 text-white"
+              size="default"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Create Post
+            </Button>
           </div>
         </header>
 
         <div className="p-6">
           <div className="max-w-7xl mx-auto space-y-6">
-            <div className="flex items-center justify-center">
-              <Button variant="outline" size="icon" onClick={prevMonth}>
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <div className="font-medium text-md min-w-[200px] text-center">
-                {currentDate.toLocaleString("default", {
-                  month: "long",
-                  year: "numeric",
-                })}
-              </div>
-              <Button variant="outline" size="icon" onClick={nextMonth}>
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-
-            <Calendar currentDate={currentDate} />
+            <PostCalendar />
           </div>
         </div>
       </SidebarInset>

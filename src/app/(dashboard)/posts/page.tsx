@@ -103,11 +103,37 @@ export function Page() {
   const [deletePostId, setDeletePostId] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
+  const { data, isLoading, error, refetch } = useQuery<PaginatedResponse>({
+    queryKey: ["posts", activeTab, currentPage, debouncedQuery],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        status: activeTab === "all" ? "" : activeTab,
+        page: currentPage.toString(),
+        limit: postsPerPage.toString(),
+        ...(debouncedQuery && { search: debouncedQuery }),
+      });
+
+      const response = await fetch(`/api/posts/get?${params}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch posts");
+      }
+      return response.json();
+    },
+  });
+
   useEffect(() => {
     if (searchParams.get("openDialog") === "true") {
+      const postId = searchParams.get("postId");
+      if (postId) {
+        // Fetch the post and set it for editing
+        const post = data?.posts.find((p) => p.id === postId);
+        if (post) {
+          setEditingPost(post);
+        }
+      }
       setIsDialogOpen(true);
     }
-  }, [searchParams]);
+  }, [searchParams, data?.posts]);
 
   const togglePostExpansion = (postId: string) => {
     setExpandedPosts((prev) =>
@@ -156,24 +182,6 @@ export function Page() {
     },
     [searchQuery]
   );
-
-  const { data, isLoading, error, refetch } = useQuery<PaginatedResponse>({
-    queryKey: ["posts", activeTab, currentPage, debouncedQuery],
-    queryFn: async () => {
-      const params = new URLSearchParams({
-        status: activeTab === "all" ? "" : activeTab,
-        page: currentPage.toString(),
-        limit: postsPerPage.toString(),
-        ...(debouncedQuery && { search: debouncedQuery }),
-      });
-
-      const response = await fetch(`/api/posts/get?${params}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch posts");
-      }
-      return response.json();
-    },
-  });
 
   const handleDeletePost = async () => {
     if (!deletePostId) return;
