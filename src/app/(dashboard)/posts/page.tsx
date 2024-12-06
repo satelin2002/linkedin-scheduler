@@ -233,6 +233,12 @@ export function Page() {
               </div>
             </header>
             <div className="max-w-7xl mx-auto px-8 mt-8">
+              <div className="space-y-0.5 mb-4">
+                <h2 className="text-2xl font-bold tracking-tight">My Posts</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  View and manage your posts.
+                </p>
+              </div>
               <div className="flex items-center justify-between">
                 <Tabs
                   defaultValue="all"

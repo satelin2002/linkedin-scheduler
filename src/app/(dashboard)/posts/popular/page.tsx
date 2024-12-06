@@ -102,6 +102,9 @@ export default function PopularPostsPage() {
             <div className="p-4">
               <div className="max-w-7xl mx-auto space-y-4">
                 <div className="space-y-2 mt-4">
+                  <h2 className="text-2xl font-bold tracking-tight">
+                    Popular Posts
+                  </h2>
                   <p className="text-sm text-muted-foreground">
                     Select a topic below to explore trending posts from the
                     community. Find inspiration and engage with popular content.

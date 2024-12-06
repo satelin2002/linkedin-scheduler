@@ -87,7 +87,7 @@ export function PostCalendar() {
     <div className="p-2 overflow-auto">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-xl font-semibold">Scheduled Posts</h1>
+          <h2 className="text-2xl font-bold tracking-tight">Scheduled Posts</h2>
           <p className="text-sm text-muted-foreground mt-1">
             View and manage your upcoming scheduled posts.{" "}
             <span className="hidden md:inline font-medium underline underline-offset-4">
