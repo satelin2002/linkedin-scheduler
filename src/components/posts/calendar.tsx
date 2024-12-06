@@ -67,15 +67,27 @@ export function PostCalendar() {
   const scrollToDate = (date: Date) => {
     const dateStr = format(date, "yyyy-MM-dd");
     const element = document.getElementById(`date-${dateStr}`);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (element && postsContainerRef.current) {
+      const container = postsContainerRef.current;
+      const elementTop = element.offsetTop;
+      const margin = 16; // 16px margin from top
+      container.scrollTo({
+        top: elementTop - margin,
+        behavior: "smooth",
+      });
     }
   };
 
   return (
     <div className="p-4 overflow-auto">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-semibold">Scheduled Posts</h1>
+        <div>
+          <h1 className="text-xl font-semibold">Scheduled Posts</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            View and manage your upcoming scheduled posts. Click on a date to
+            see posts scheduled for that day.
+          </p>
+        </div>
       </div>
 
       <div className="grid md:grid-cols-[300px,1fr] gap-8">
@@ -106,7 +118,7 @@ export function PostCalendar() {
         </div>
 
         <div
-          className="space-y-4 overflow-auto max-h-[calc(100vh-16rem)] p-4"
+          className="space-y-4 overflow-auto max-h-[calc(100vh-16rem)] px-4"
           ref={postsContainerRef}
         >
           {isLoading
